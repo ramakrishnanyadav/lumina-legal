@@ -15,6 +15,28 @@ const mockResults = {
   bail: 'Bailable',
 };
 
+const springConfig = { damping: 20, stiffness: 300 };
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', ...springConfig },
+  },
+};
+
 const CrimeAnalyzer = () => {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -47,7 +69,7 @@ const CrimeAnalyzer = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ type: 'spring', ...springConfig }}
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -64,16 +86,16 @@ const CrimeAnalyzer = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
         >
           {/* Animated gradient border */}
           <motion.div
-            className="absolute -inset-[2px] rounded-2xl opacity-50"
+            className="absolute -inset-[2px] rounded-2xl"
             style={{
               background: 'linear-gradient(135deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%))',
             }}
-            animate={isFocused ? { opacity: 1 } : { opacity: 0.3 }}
-            transition={{ duration: 0.3 }}
+            animate={{ opacity: isFocused ? 1 : 0.3 }}
+            transition={{ type: 'spring', ...springConfig }}
           />
 
           <div className="relative glass rounded-2xl p-6">
@@ -90,11 +112,13 @@ const CrimeAnalyzer = () => {
               <motion.span
                 className="text-sm text-muted-foreground"
                 animate={{ opacity: text.length > 0 ? 1 : 0.5 }}
+                transition={{ type: 'spring', ...springConfig }}
               >
                 <motion.span
                   key={text.length}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', ...springConfig }}
                   className="text-primary font-mono"
                 >
                   {text.length}
@@ -121,20 +145,20 @@ const CrimeAnalyzer = () => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ type: 'spring', ...springConfig }}
               className="mt-12 space-y-6"
             >
               {/* Success indicator */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200 }}
+                transition={{ type: 'spring', ...springConfig }}
                 className="flex items-center justify-center gap-2 text-green-400"
               >
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: 'spring' }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
                   className="w-8 h-8 rounded-full bg-green-400/20 flex items-center justify-center"
                 >
                   <Check className="w-5 h-5" />
@@ -142,115 +166,118 @@ const CrimeAnalyzer = () => {
                 <span className="font-medium">Analysis Complete</span>
               </motion.div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <GlassCard delay={0.1}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Severity</p>
-                      <p className="font-semibold text-yellow-400">{results.severity}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-
-                <GlassCard delay={0.2}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-red-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Max Punishment</p>
-                      <p className="font-semibold text-red-400">{results.maxPunishment}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-
-                <GlassCard delay={0.3}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                      <Scale className="w-5 h-5 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Bail Status</p>
-                      <p className="font-semibold text-green-400">{results.bail}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-              </div>
-
-              {/* Applicable Sections */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  Applicable Legal Sections
-                </h3>
-
-                {results.sections.map((section, index) => (
-                  <motion.div
-                    key={section.code}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                  >
-                    <GlassCard hover gradient>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="font-mono text-lg font-bold text-primary">
-                            {section.code}
-                          </div>
-                          <div>
-                            <p className="font-medium">{section.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Indian Penal Code
-                            </p>
-                          </div>
+              {/* Quick Stats with stagger */}
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {[
+                  { icon: AlertTriangle, label: 'Severity', value: results.severity, color: 'yellow' },
+                  { icon: Clock, label: 'Max Punishment', value: results.maxPunishment, color: 'red' },
+                  { icon: Scale, label: 'Bail Status', value: results.bail, color: 'green' },
+                ].map((stat, index) => (
+                  <motion.div key={stat.label} variants={itemVariants}>
+                    <GlassCard index={index}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg bg-${stat.color}-500/20 flex items-center justify-center`}>
+                          <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
                         </div>
-
-                        {/* Confidence Ring */}
-                        <div className="relative w-16 h-16">
-                          <svg className="w-full h-full transform -rotate-90">
-                            <circle
-                              cx="32"
-                              cy="32"
-                              r="28"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              fill="none"
-                              className="text-muted"
-                            />
-                            <motion.circle
-                              cx="32"
-                              cy="32"
-                              r="28"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              fill="none"
-                              strokeLinecap="round"
-                              className={getConfidenceColor(section.confidence)}
-                              strokeDasharray={`${(section.confidence / 100) * 176} 176`}
-                              initial={{ strokeDasharray: '0 176' }}
-                              animate={{
-                                strokeDasharray: `${(section.confidence / 100) * 176} 176`,
-                              }}
-                              transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                            />
-                          </svg>
-                          <motion.span
-                            className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${getConfidenceColor(section.confidence)}`}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1 + index * 0.1 }}
-                          >
-                            {section.confidence}%
-                          </motion.span>
+                        <div>
+                          <p className="text-sm text-muted-foreground">{stat.label}</p>
+                          <p className={`font-semibold text-${stat.color}-400`}>{stat.value}</p>
                         </div>
                       </div>
                     </GlassCard>
                   </motion.div>
                 ))}
+              </motion.div>
+
+              {/* Applicable Sections */}
+              <div className="space-y-4">
+                <motion.h3 
+                  className="text-xl font-semibold flex items-center gap-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ type: 'spring', ...springConfig, delay: 0.3 }}
+                >
+                  <FileText className="w-5 h-5 text-primary" />
+                  Applicable Legal Sections
+                </motion.h3>
+
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {results.sections.map((section, index) => (
+                    <motion.div
+                      key={section.code}
+                      variants={itemVariants}
+                      className="mb-4"
+                    >
+                      <GlassCard hover gradient index={index}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <motion.div 
+                              className="font-mono text-lg font-bold text-primary"
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ type: 'spring', ...springConfig, delay: 0.5 + index * 0.1 }}
+                            >
+                              {section.code}
+                            </motion.div>
+                            <div>
+                              <p className="font-medium">{section.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Indian Penal Code
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Confidence Ring */}
+                          <div className="relative w-16 h-16">
+                            <svg className="w-full h-full transform -rotate-90">
+                              <circle
+                                cx="32"
+                                cy="32"
+                                r="28"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                className="text-muted"
+                              />
+                              <motion.circle
+                                cx="32"
+                                cy="32"
+                                r="28"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                strokeLinecap="round"
+                                className={getConfidenceColor(section.confidence)}
+                                initial={{ strokeDasharray: '0 176' }}
+                                animate={{
+                                  strokeDasharray: `${(section.confidence / 100) * 176} 176`,
+                                }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 100, delay: 0.6 + index * 0.1 }}
+                              />
+                            </svg>
+                            <motion.span
+                              className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${getConfidenceColor(section.confidence)}`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ type: 'spring', ...springConfig, delay: 1 + index * 0.1 }}
+                            >
+                              {section.confidence}%
+                            </motion.span>
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             </motion.div>
           )}
