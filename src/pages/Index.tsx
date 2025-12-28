@@ -1,12 +1,42 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import ParticleBackground from '@/components/ParticleBackground';
+import Navbar from '@/components/Navbar';
+import HeroSection from '@/components/HeroSection';
+import CrimeAnalyzer from '@/components/CrimeAnalyzer';
+import PerspectiveToggle from '@/components/PerspectiveToggle';
+import ProceduralTimeline from '@/components/ProceduralTimeline';
+import LawyerMarketplace from '@/components/LawyerMarketplace';
+import FloatingAIChat from '@/components/FloatingAIChat';
+import ScrollProgress from '@/components/ScrollProgress';
+import Footer from '@/components/Footer';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Effects */}
+      <ParticleBackground />
+      <ScrollProgress />
+      
+      {/* Navigation */}
+      <Navbar />
+      
+      {/* Main Content */}
+      <main>
+        <HeroSection />
+        <CrimeAnalyzer />
+        <PerspectiveToggle />
+        <section id="timeline">
+          <ProceduralTimeline />
+        </section>
+        <section id="lawyers">
+          <LawyerMarketplace />
+        </section>
+      </main>
+      
+      {/* Footer */}
+      <Footer />
+      
+      {/* Floating Elements */}
+      <FloatingAIChat />
     </div>
   );
 };
