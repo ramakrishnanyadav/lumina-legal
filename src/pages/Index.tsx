@@ -8,10 +8,14 @@ import LawyerMarketplace from '@/components/LawyerMarketplace';
 import FloatingAIChat from '@/components/FloatingAIChat';
 import ScrollProgress from '@/components/ScrollProgress';
 import Footer from '@/components/Footer';
+import AnimatedToast from '@/components/AnimatedToast';
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
+      {/* Toast notifications with confetti */}
+      <AnimatedToast />
+      
       {/* Animated gradient mesh background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div 

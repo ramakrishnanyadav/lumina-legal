@@ -1,4 +1,4 @@
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { motion, useSpring } from 'framer-motion';
 import { ReactNode, useState, useRef, useCallback } from 'react';
 
 interface AnimatedButtonProps {
@@ -23,14 +23,12 @@ const AnimatedButton = ({
   icon,
 }: AnimatedButtonProps) => {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+  const [isPressed, setIsPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Magnetic effect
   const mouseX = useSpring(0, springConfig);
   const mouseY = useSpring(0, springConfig);
-  
-  // Gradient animation position
-  const gradientPosition = useSpring(0, { damping: 30, stiffness: 100 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!buttonRef.current) return;
@@ -70,11 +68,14 @@ const AnimatedButton = ({
     onClick?.();
   };
 
+  const handleMouseDown = () => setIsPressed(true);
+  const handleMouseUp = () => setIsPressed(false);
+
   const baseClasses = 'relative overflow-hidden font-semibold rounded-xl transition-colors duration-300';
   
   const variantClasses = {
     primary: 'text-primary-foreground hover:shadow-lg hover:shadow-primary/25',
-    secondary: 'glass border-white/20 text-foreground hover:bg-white/10',
+    secondary: 'text-foreground hover:bg-white/10',
     ghost: 'bg-transparent text-foreground hover:bg-white/5',
   };
 
@@ -87,32 +88,38 @@ const AnimatedButton = ({
   return (
     <motion.button
       ref={buttonRef}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className} ${
-        variant === 'primary' ? 'animated-gradient-bg' : ''
-      }`}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       onClick={handleClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       style={{
         x: mouseX,
         y: mouseY,
         background: variant === 'primary' 
           ? 'linear-gradient(90deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%), hsl(187 100% 50%))'
-          : undefined,
+          : variant === 'secondary'
+            ? 'rgba(255, 255, 255, 0.05)'
+            : undefined,
         backgroundSize: variant === 'primary' ? '300% 100%' : undefined,
+        border: variant === 'secondary' ? '1px solid rgba(255, 255, 255, 0.15)' : undefined,
+        boxShadow: variant === 'secondary' 
+          ? 'inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.2)'
+          : undefined,
       }}
       whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      animate={variant === 'primary' ? {
-        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-      } : undefined}
+      animate={{
+        scale: isPressed ? 0.95 : 1,
+        backgroundPosition: variant === 'primary' ? ['0% 50%', '100% 50%', '0% 50%'] : undefined,
+      }}
       transition={variant === 'primary' ? {
         backgroundPosition: {
           duration: 3,
           repeat: Infinity,
           ease: 'linear',
         },
-        scale: springConfig,
+        scale: { type: 'spring', ...springConfig },
       } : { type: 'spring', ...springConfig }}
       disabled={loading}
     >
