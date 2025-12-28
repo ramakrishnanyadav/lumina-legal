@@ -20,6 +20,7 @@ import {
 import EvidenceChecklist from './EvidenceChecklist';
 import FIRTemplatePreview from './FIRTemplatePreview';
 import UrgencyIndicator from './UrgencyIndicator';
+import LegalHelpBanner from './LegalHelpBanner';
 
 const mockResults = {
   overallConfidence: 82,
@@ -432,6 +433,24 @@ const CrimeAnalyzerContent = () => {
                         name: results.sections[0]?.name || 'Unknown',
                       }}
                       relatedSections={results.sections.slice(1).map(s => ({ code: s.code, name: s.name }))}
+                      caseType={caseType}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Legal Help Banner - contextual */}
+              <AnimatePresence>
+                {isStageReached('complete') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 }}
+                  >
+                    <LegalHelpBanner
+                      isVisible={true}
+                      isUrgent={isUrgent}
+                      severity={results.overallConfidence >= 80 ? 'high' : 'medium'}
                       caseType={caseType}
                     />
                   </motion.div>
