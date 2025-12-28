@@ -1,7 +1,8 @@
-import { motion, useInView, Variants } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { ReactNode, useRef } from 'react';
+import { useInView } from 'framer-motion';
 
-type RevealType = 'fade' | 'slide' | 'scale' | 'mask' | 'split';
+type RevealType = 'fade' | 'slide' | 'scale';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -12,18 +13,24 @@ interface ScrollRevealProps {
   once?: boolean;
 }
 
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
+
+// Subtle fade with small slide (10-20px max)
 const fadeVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0 },
 };
 
+// Subtle slide
 const slideVariants: Variants = {
-  hidden: { opacity: 0, x: -50 },
+  hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0 },
 };
 
+// Subtle scale
 const scaleVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
+  hidden: { opacity: 0, scale: 0.98 },
   visible: { opacity: 1, scale: 1 },
 };
 
@@ -42,12 +49,22 @@ const ScrollReveal = ({
   children,
   type = 'fade',
   delay = 0,
-  duration = 0.6,
+  duration = 0.4,
   className = '',
   once = true,
 }: ScrollRevealProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once, margin: '-100px' });
+  // Trigger when 20% visible
+  const isInView = useInView(ref, { once, amount: 0.2 });
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+    : false;
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div
@@ -59,7 +76,7 @@ const ScrollReveal = ({
       transition={{
         duration,
         delay,
-        ease: [0.4, 0, 0.2, 1],
+        ease: easeOut,
       }}
     >
       {children}
@@ -67,7 +84,62 @@ const ScrollReveal = ({
   );
 };
 
-// Masked reveal component
+// Staggered children reveal
+export const StaggeredReveal = ({
+  children,
+  staggerDelay = 0.05, // 50ms between elements
+  className = '',
+}: {
+  children: ReactNode;
+  staggerDelay?: number;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: staggerDelay,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: easeOut,
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial="hidden"
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={containerVariants}
+    >
+      {Array.isArray(children) 
+        ? children.map((child, index) => (
+            <motion.div key={index} variants={itemVariants}>
+              {child}
+            </motion.div>
+          ))
+        : <motion.div variants={itemVariants}>{children}</motion.div>
+      }
+    </motion.div>
+  );
+};
+
+// Masked reveal component - simplified
 export const MaskedReveal = ({
   children,
   direction = 'up',
@@ -80,7 +152,7 @@ export const MaskedReveal = ({
   className?: string;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const clipPaths = {
     up: ['inset(100% 0 0 0)', 'inset(0 0 0 0)'],
@@ -94,7 +166,7 @@ export const MaskedReveal = ({
       <motion.div
         initial={{ clipPath: clipPaths[direction][0], opacity: 0 }}
         animate={isInView ? { clipPath: clipPaths[direction][1], opacity: 1 } : {}}
-        transition={{ duration: 0.8, delay, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.5, delay, ease: easeOut }}
       >
         {children}
       </motion.div>

@@ -1,5 +1,5 @@
-import { motion, useSpring } from 'framer-motion';
-import { ReactNode, useState, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { ReactNode, useState, useRef } from 'react';
 
 interface AnimatedButtonProps {
   children: ReactNode;
@@ -11,7 +11,8 @@ interface AnimatedButtonProps {
   icon?: ReactNode;
 }
 
-const springConfig = { damping: 20, stiffness: 300 };
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
 
 const AnimatedButton = ({
   children,
@@ -23,36 +24,7 @@ const AnimatedButton = ({
   icon,
 }: AnimatedButtonProps) => {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
-  const [isPressed, setIsPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  
-  // Magnetic effect
-  const mouseX = useSpring(0, springConfig);
-  const mouseY = useSpring(0, springConfig);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!buttonRef.current) return;
-    
-    const rect = buttonRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const distanceX = e.clientX - centerX;
-    const distanceY = e.clientY - centerY;
-    const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-    
-    // Magnetic pull within 100px radius
-    if (distance < 100) {
-      const factor = (1 - distance / 100) * 0.3;
-      mouseX.set(distanceX * factor);
-      mouseY.set(distanceY * factor);
-    }
-  }, [mouseX, mouseY]);
-
-  const handleMouseLeave = useCallback(() => {
-    mouseX.set(0);
-    mouseY.set(0);
-  }, [mouseX, mouseY]);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -63,18 +35,15 @@ const AnimatedButton = ({
     setRipples((prev) => [...prev, { x, y, id }]);
     setTimeout(() => {
       setRipples((prev) => prev.filter((r) => r.id !== id));
-    }, 600);
+    }, 400);
 
     onClick?.();
   };
 
-  const handleMouseDown = () => setIsPressed(true);
-  const handleMouseUp = () => setIsPressed(false);
-
-  const baseClasses = 'relative overflow-hidden font-semibold rounded-xl transition-colors duration-300';
+  const baseClasses = 'relative overflow-hidden font-semibold rounded-xl transition-shadow duration-300';
   
   const variantClasses = {
-    primary: 'text-primary-foreground hover:shadow-lg hover:shadow-primary/25',
+    primary: 'text-primary-foreground hover:shadow-lg hover:shadow-primary/20',
     secondary: 'text-foreground hover:bg-white/10',
     ghost: 'bg-transparent text-foreground hover:bg-white/5',
   };
@@ -90,49 +59,33 @@ const AnimatedButton = ({
       ref={buttonRef}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       onClick={handleClick}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
       style={{
-        x: mouseX,
-        y: mouseY,
         background: variant === 'primary' 
-          ? 'linear-gradient(90deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%), hsl(187 100% 50%))'
+          ? 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))'
           : variant === 'secondary'
             ? 'rgba(255, 255, 255, 0.05)'
             : undefined,
-        backgroundSize: variant === 'primary' ? '300% 100%' : undefined,
-        border: variant === 'secondary' ? '1px solid rgba(255, 255, 255, 0.15)' : undefined,
-        boxShadow: variant === 'secondary' 
-          ? 'inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.2)'
-          : undefined,
+        border: variant === 'secondary' ? '1px solid rgba(255, 255, 255, 0.1)' : undefined,
       }}
       whileHover={{ scale: 1.02 }}
-      animate={{
-        scale: isPressed ? 0.95 : 1,
-        backgroundPosition: variant === 'primary' ? ['0% 50%', '100% 50%', '0% 50%'] : undefined,
+      whileTap={{ scale: 0.98 }}
+      transition={{ 
+        duration: 0.15, 
+        ease: easeOut 
       }}
-      transition={variant === 'primary' ? {
-        backgroundPosition: {
-          duration: 3,
-          repeat: Infinity,
-          ease: 'linear',
-        },
-        scale: { type: 'spring', ...springConfig },
-      } : { type: 'spring', ...springConfig }}
       disabled={loading}
     >
+      {/* Subtle ripple effect */}
       {ripples.map((ripple) => (
         <motion.span
           key={ripple.id}
-          className="absolute bg-white/30 rounded-full pointer-events-none"
-          initial={{ width: 0, height: 0, opacity: 0.5 }}
-          animate={{ width: 300, height: 300, opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="absolute bg-white/20 rounded-full pointer-events-none"
+          initial={{ width: 0, height: 0, opacity: 0.4 }}
+          animate={{ width: 200, height: 200, opacity: 0 }}
+          transition={{ duration: 0.4, ease: easeOut }}
           style={{
-            left: ripple.x - 150,
-            top: ripple.y - 150,
+            left: ripple.x - 100,
+            top: ripple.y - 100,
           }}
         />
       ))}
@@ -140,10 +93,14 @@ const AnimatedButton = ({
       <span className="relative z-10 flex items-center justify-center gap-2">
         {loading ? (
           <motion.div
-            className="w-5 h-5 border-2 border-current border-t-transparent rounded-full"
+            className="w-5 h-5"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          />
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          </motion.div>
         ) : (
           <>
             {icon && <span>{icon}</span>}
