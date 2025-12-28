@@ -1,0 +1,263 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Check, AlertTriangle, Scale, Clock, FileText } from 'lucide-react';
+import AnimatedButton from './AnimatedButton';
+import GlassCard from './GlassCard';
+
+const mockResults = {
+  sections: [
+    { code: 'IPC 420', name: 'Cheating', confidence: 92 },
+    { code: 'IPC 406', name: 'Criminal Breach of Trust', confidence: 78 },
+    { code: 'IPC 468', name: 'Forgery for cheating', confidence: 65 },
+  ],
+  severity: 'Moderate',
+  maxPunishment: '7 years imprisonment',
+  bail: 'Bailable',
+};
+
+const CrimeAnalyzer = () => {
+  const [text, setText] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<typeof mockResults | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleAnalyze = async () => {
+    if (!text.trim()) return;
+    
+    setIsAnalyzing(true);
+    setResults(null);
+    
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    
+    setIsAnalyzing(false);
+    setResults(mockResults);
+  };
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 80) return 'text-green-400';
+    if (confidence >= 60) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
+  return (
+    <section id="analyzer" className="relative py-24 px-4">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <span className="gradient-text">AI Crime Analyzer</span>
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            Describe the situation and our AI will identify applicable legal sections
+          </p>
+        </motion.div>
+
+        {/* Input Section */}
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          {/* Animated gradient border */}
+          <motion.div
+            className="absolute -inset-[2px] rounded-2xl opacity-50"
+            style={{
+              background: 'linear-gradient(135deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%))',
+            }}
+            animate={isFocused ? { opacity: 1 } : { opacity: 0.3 }}
+            transition={{ duration: 0.3 }}
+          />
+
+          <div className="relative glass rounded-2xl p-6">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Describe the legal situation in detail. For example: 'A person took money promising to return with interest but has been avoiding contact for 6 months...'"
+              className="w-full h-48 bg-transparent border-none outline-none resize-none text-foreground placeholder:text-muted-foreground/50 text-lg"
+            />
+
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+              <motion.span
+                className="text-sm text-muted-foreground"
+                animate={{ opacity: text.length > 0 ? 1 : 0.5 }}
+              >
+                <motion.span
+                  key={text.length}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-primary font-mono"
+                >
+                  {text.length}
+                </motion.span>
+                {' / 2000 characters'}
+              </motion.span>
+
+              <AnimatedButton
+                variant="primary"
+                onClick={handleAnalyze}
+                loading={isAnalyzing}
+                icon={isAnalyzing ? undefined : <Search className="w-4 h-4" />}
+              >
+                {isAnalyzing ? 'Analyzing...' : 'Analyze Case'}
+              </AnimatedButton>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Results Section */}
+        <AnimatePresence mode="wait">
+          {results && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-12 space-y-6"
+            >
+              {/* Success indicator */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200 }}
+                className="flex items-center justify-center gap-2 text-green-400"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring' }}
+                  className="w-8 h-8 rounded-full bg-green-400/20 flex items-center justify-center"
+                >
+                  <Check className="w-5 h-5" />
+                </motion.div>
+                <span className="font-medium">Analysis Complete</span>
+              </motion.div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <GlassCard delay={0.1}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Severity</p>
+                      <p className="font-semibold text-yellow-400">{results.severity}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <GlassCard delay={0.2}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-red-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Max Punishment</p>
+                      <p className="font-semibold text-red-400">{results.maxPunishment}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <GlassCard delay={0.3}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                      <Scale className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Bail Status</p>
+                      <p className="font-semibold text-green-400">{results.bail}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+              </div>
+
+              {/* Applicable Sections */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Applicable Legal Sections
+                </h3>
+
+                {results.sections.map((section, index) => (
+                  <motion.div
+                    key={section.code}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                  >
+                    <GlassCard hover gradient>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="font-mono text-lg font-bold text-primary">
+                            {section.code}
+                          </div>
+                          <div>
+                            <p className="font-medium">{section.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Indian Penal Code
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Confidence Ring */}
+                        <div className="relative w-16 h-16">
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle
+                              cx="32"
+                              cy="32"
+                              r="28"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              className="text-muted"
+                            />
+                            <motion.circle
+                              cx="32"
+                              cy="32"
+                              r="28"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                              strokeLinecap="round"
+                              className={getConfidenceColor(section.confidence)}
+                              strokeDasharray={`${(section.confidence / 100) * 176} 176`}
+                              initial={{ strokeDasharray: '0 176' }}
+                              animate={{
+                                strokeDasharray: `${(section.confidence / 100) * 176} 176`,
+                              }}
+                              transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                            />
+                          </svg>
+                          <motion.span
+                            className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${getConfidenceColor(section.confidence)}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1 + index * 0.1 }}
+                          >
+                            {section.confidence}%
+                          </motion.span>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
+  );
+};
+
+export default CrimeAnalyzer;
