@@ -10,6 +10,8 @@ import ScrollProgress from '@/components/ScrollProgress';
 import Footer from '@/components/Footer';
 import AnimatedToast from '@/components/AnimatedToast';
 import CustomCursor from '@/components/CustomCursor';
+import { ScrollSpotlight } from '@/components/ParallaxSection';
+import ScrollReveal from '@/components/ScrollReveal';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
@@ -48,6 +50,9 @@ const Index = () => {
         />
       </div>
 
+      {/* Scroll spotlight effect */}
+      <ScrollSpotlight />
+
       {/* Effects */}
       <ParticleBackground />
       <ScrollProgress />
@@ -55,16 +60,24 @@ const Index = () => {
       {/* Navigation */}
       <Navbar />
       
-      {/* Main Content */}
+      {/* Main Content with scroll snap */}
       <main className="relative z-10">
         <HeroSection />
-        <CrimeAnalyzer />
-        <PerspectiveSwitcher />
+        <ScrollReveal type="scale">
+          <CrimeAnalyzer />
+        </ScrollReveal>
+        <ScrollReveal type="fade" delay={0.1}>
+          <PerspectiveSwitcher />
+        </ScrollReveal>
         <section id="timeline">
-          <ProceduralTimeline />
+          <ScrollReveal type="slide">
+            <ProceduralTimeline />
+          </ScrollReveal>
         </section>
         <section id="lawyers">
-          <LawyerMarketplace />
+          <ScrollReveal type="scale" delay={0.1}>
+            <LawyerMarketplace />
+          </ScrollReveal>
         </section>
       </main>
       

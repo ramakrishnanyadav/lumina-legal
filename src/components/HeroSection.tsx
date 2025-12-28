@@ -3,6 +3,10 @@ import { Scale, Shield, FileText, Gavel } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
+import TextReveal from './TextReveal';
+import NumberCounter from './NumberCounter';
+import { ParallaxLayer } from './ParallaxSection';
+import MorphingBlob from './MorphingBlob';
 
 const floatingCards = [
   { icon: Scale, label: 'Criminal Law', color: 'from-primary to-secondary' },
@@ -14,7 +18,6 @@ const floatingCards = [
 const springConfig = { damping: 20, stiffness: 300 };
 
 const HeroSection = () => {
-  const words = ['Know', 'Your', 'Legal', 'Rights', 'Instantly'];
   const containerRef = useRef<HTMLElement>(null);
   
   // Parallax scroll
@@ -23,20 +26,32 @@ const HeroSection = () => {
     offset: ['start start', 'end start']
   });
 
-  // Three layers with different speeds
-  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const layer3Y = useTransform(scrollYProgress, [0, 1], [0, -300]);
+  // Four layers with different speeds (10%, 30%, 60%, 100%)
+  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -50]);   // 10% - Background
+  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -150]);  // 30% - Mid
+  const layer3Y = useTransform(scrollYProgress, [0, 1], [0, -300]);  // 60% - Foreground
+  const layer4Y = useTransform(scrollYProgress, [0, 1], [0, -500]);  // 100% - Text (normal)
   
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
 
   return (
     <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-20">
-      {/* Layer 1 - Background gradient (slowest) */}
+      {/* Layer 1 - Background (10% parallax) - Morphing blobs */}
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"
+        className="absolute inset-0"
         style={{ y: layer1Y }}
       >
+        <MorphingBlob 
+          className="top-1/4 left-1/4" 
+          color="hsl(266 93% 58%)" 
+          size={600}
+        />
+        <MorphingBlob 
+          className="bottom-1/4 right-1/4" 
+          color="hsl(187 100% 50%)" 
+          size={500}
+        />
         <motion.div
           className="absolute inset-0 opacity-30"
           style={{
@@ -50,10 +65,39 @@ const HeroSection = () => {
         />
       </motion.div>
 
-      {/* Layer 2 - Floating cards (medium speed) */}
+      {/* Layer 2 - Mid layer (30% parallax) - Decorative shapes */}
       <motion.div 
         className="absolute inset-0 overflow-hidden pointer-events-none"
         style={{ y: layer2Y, opacity }}
+      >
+        {[...Array(6)].map((_, index) => (
+          <motion.div
+            key={index}
+            className="absolute w-32 h-32 rounded-full opacity-20"
+            style={{
+              background: `linear-gradient(135deg, hsl(${180 + index * 20} 80% 50%), transparent)`,
+              top: `${Math.random() * 80}%`,
+              left: `${Math.random() * 80}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              rotate: [0, 180, 360],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 10 + index * 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: index * 0.5,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Layer 3 - Foreground (60% parallax) - Floating cards */}
+      <motion.div 
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        style={{ y: layer3Y, opacity }}
       >
         {floatingCards.map((card, index) => (
           <motion.div
@@ -89,10 +133,10 @@ const HeroSection = () => {
         ))}
       </motion.div>
 
-      {/* Layer 3 - Main content (fastest - stays in view longer) */}
+      {/* Layer 4 - Text content (100% - normal scroll) */}
       <motion.div 
         className="relative z-10 text-center max-w-5xl mx-auto"
-        style={{ y: layer3Y, opacity }}
+        style={{ y: layer4Y, opacity, scale }}
       >
         {/* Badge */}
         <motion.div
@@ -105,23 +149,14 @@ const HeroSection = () => {
           <span className="text-sm text-muted-foreground">AI-Powered Legal Analysis</span>
         </motion.div>
 
-        {/* Animated heading */}
+        {/* Animated heading with split text */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-          {words.map((word, index) => (
-            <motion.span
-              key={word}
-              className={`inline-block mr-4 ${index === 2 || index === 3 ? 'gradient-text' : 'text-foreground'}`}
-              initial={{ opacity: 0, y: 50, rotateX: -90 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{
-                type: 'spring',
-                ...springConfig,
-                delay: 0.3 + index * 0.1,
-              }}
-            >
-              {word}
-            </motion.span>
-          ))}
+          <TextReveal 
+            text="Know Your Legal Rights Instantly" 
+            type="letter"
+            stagger={0.03}
+            className="inline"
+          />
         </h1>
 
         {/* Glowing underline */}
@@ -133,26 +168,31 @@ const HeroSection = () => {
           }}
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: '60%', opacity: 1 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 100, delay: 1 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 100, delay: 1.5 }}
         />
 
-        {/* Subtitle */}
-        <motion.p
-          className="mt-8 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"
+        {/* Subtitle with word reveal */}
+        <motion.div
+          className="mt-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', ...springConfig, delay: 1.2 }}
+          transition={{ type: 'spring', ...springConfig, delay: 1.8 }}
         >
-          Understand complex legal situations with AI. Get instant analysis of applicable laws,
-          your rights, and recommended next steps.
-        </motion.p>
+          <TextReveal
+            text="Understand complex legal situations with AI. Get instant analysis of applicable laws, your rights, and recommended next steps."
+            type="word"
+            stagger={0.03}
+            delay={2}
+            className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"
+          />
+        </motion.div>
 
         {/* CTA Buttons */}
         <motion.div
           className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', ...springConfig, delay: 1.4 }}
+          transition={{ type: 'spring', ...springConfig, delay: 2.5 }}
         >
           <AnimatedButton
             variant="primary"
@@ -168,29 +208,46 @@ const HeroSection = () => {
           </AnimatedButton>
         </motion.div>
 
-        {/* Trust indicators */}
+        {/* Trust indicators with number counters */}
         <motion.div
           className="mt-16 flex flex-wrap items-center justify-center gap-8 text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ type: 'spring', ...springConfig, delay: 1.6 }}
+          transition={{ type: 'spring', ...springConfig, delay: 2.8 }}
         >
-          {[
-            { icon: Shield, text: '100% Confidential', color: 'text-primary' },
-            { icon: Scale, text: '10,000+ Cases Analyzed', color: 'text-secondary' },
-            { icon: Gavel, text: '500+ Legal Experts', color: 'text-accent' },
-          ].map((item, index) => (
-            <motion.div 
-              key={item.text}
-              className="flex items-center gap-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ type: 'spring', ...springConfig, delay: 1.6 + index * 0.1 }}
-            >
-              <item.icon className={`w-5 h-5 ${item.color}`} />
-              <span className="text-sm">{item.text}</span>
-            </motion.div>
-          ))}
+          <motion.div 
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', ...springConfig, delay: 2.9 }}
+          >
+            <Shield className="w-5 h-5 text-primary" />
+            <span className="text-sm">100% Confidential</span>
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', ...springConfig, delay: 3.0 }}
+          >
+            <Scale className="w-5 h-5 text-secondary" />
+            <span className="text-sm">
+              <NumberCounter value={10000} suffix="+" className="font-bold" /> Cases Analyzed
+            </span>
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', ...springConfig, delay: 3.1 }}
+          >
+            <Gavel className="w-5 h-5 text-accent" />
+            <span className="text-sm">
+              <NumberCounter value={500} suffix="+" className="font-bold" /> Legal Experts
+            </span>
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>
