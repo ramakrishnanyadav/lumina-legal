@@ -1,7 +1,10 @@
 import { motion, useSpring } from 'framer-motion';
 import { Star, MapPin, Briefcase, MessageSquare, Award } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
-import { useRef, useCallback } from 'react';
+import TiltCard from './TiltCard';
+import { useRef, useCallback, useState } from 'react';
+import ContextMenu from './ContextMenu';
+import { useLongPress } from '@/hooks/useGestureInteractions';
 
 const lawyers = [
   {
@@ -76,6 +79,17 @@ const LawyerCard = ({ lawyer, index }: { lawyer: typeof lawyers[0]; index: numbe
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useSpring(0, springConfig);
   const mouseY = useSpring(0, springConfig);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+
+  const { isLongPressed, handlers: longPressHandlers } = useLongPress({
+    threshold: 500,
+    onLongPress: () => {
+      if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        setContextMenu({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+      }
+    },
+  });
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
@@ -99,15 +113,24 @@ const LawyerCard = ({ lawyer, index }: { lawyer: typeof lawyers[0]; index: numbe
   }, [mouseX, mouseY]);
 
   return (
-    <motion.div
-      ref={cardRef}
-      className="group relative"
-      variants={cardVariants}
-      style={{ x: mouseX, y: mouseY }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ scale: 1.02, transition: { type: 'spring', ...springConfig } }}
-    >
+    <>
+      <ContextMenu
+        isOpen={contextMenu !== null}
+        x={contextMenu?.x ?? 0}
+        y={contextMenu?.y ?? 0}
+        onClose={() => setContextMenu(null)}
+      />
+      <TiltCard className="group" maxTilt={12} glare parallaxElements>
+        <motion.div
+          ref={cardRef}
+          className="relative"
+          variants={cardVariants}
+          style={{ x: mouseX, y: mouseY }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          {...longPressHandlers}
+          data-interactive
+        >
       {/* Gradient border on hover */}
       <motion.div
         className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100"
@@ -226,7 +249,9 @@ const LawyerCard = ({ lawyer, index }: { lawyer: typeof lawyers[0]; index: numbe
           Contact
         </AnimatedButton>
       </div>
-    </motion.div>
+        </motion.div>
+      </TiltCard>
+    </>
   );
 };
 

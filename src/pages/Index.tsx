@@ -9,10 +9,16 @@ import FloatingAIChat from '@/components/FloatingAIChat';
 import ScrollProgress from '@/components/ScrollProgress';
 import Footer from '@/components/Footer';
 import AnimatedToast from '@/components/AnimatedToast';
+import CustomCursor from '@/components/CustomCursor';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
+  const isMobile = useIsMobile();
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
+      {/* Custom cursor - desktop only */}
+      {!isMobile && <CustomCursor />}
+      
       {/* Toast notifications with confetti */}
       <AnimatedToast />
       
