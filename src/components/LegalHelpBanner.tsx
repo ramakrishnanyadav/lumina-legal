@@ -83,9 +83,10 @@ const LegalHelpBanner = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
+      exit={{ opacity: 0, y: 16 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="relative overflow-hidden rounded-2xl"
       style={{
         background: context.accentColor,
@@ -100,17 +101,17 @@ const LegalHelpBanner = ({
         }}
       />
 
-      {/* Main content */}
-      <div className="relative p-4">
+      {/* Main content - consistent 24px padding */}
+      <div className="relative p-6">
         {/* Header row - always visible */}
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between gap-4"
+          className="w-full flex items-center justify-between gap-4 min-h-[44px]"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: context.borderColor }}
             >
               <IconComponent className={`w-5 h-5 ${context.textColor}`} />
@@ -122,7 +123,7 @@ const LegalHelpBanner = ({
           </div>
           <motion.div
             animate={{ rotate: isExpanded ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </motion.div>
@@ -135,7 +136,7 @@ const LegalHelpBanner = ({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
               <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
@@ -143,16 +144,16 @@ const LegalHelpBanner = ({
                   <motion.button
                     key={option.id}
                     type="button"
-                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all duration-200 min-h-[44px] ${
                       option.primary
-                        ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 hover:border-cyan-500/50'
+                        ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 hover:border-primary/50'
                         : 'bg-white/5 border border-white/10 hover:bg-white/10'
                     }`}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                   >
-                    <div className="flex items-center gap-3">
-                      <option.icon className={`w-5 h-5 ${option.primary ? 'text-cyan-400' : 'text-muted-foreground'}`} />
+                    <div className="flex items-center gap-4">
+                      <option.icon className={`w-5 h-5 flex-shrink-0 ${option.primary ? 'text-primary' : 'text-muted-foreground'}`} />
                       <div className="text-left">
                         <p className={`text-sm font-medium ${option.primary ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {option.label}
@@ -160,7 +161,7 @@ const LegalHelpBanner = ({
                         <p className="text-xs text-muted-foreground/70">{option.description}</p>
                       </div>
                     </div>
-                    <span className={`text-sm ${option.primary ? 'text-cyan-400' : 'text-muted-foreground'}`}>
+                    <span className={`text-sm flex-shrink-0 ${option.primary ? 'text-primary' : 'text-muted-foreground'}`}>
                       {option.action} →
                     </span>
                   </motion.button>
@@ -168,17 +169,17 @@ const LegalHelpBanner = ({
               </div>
 
               {/* Emergency hotlines */}
-              <div className="mt-4 pt-3 border-t border-white/10">
+              <div className="mt-4 pt-4 border-t border-white/10">
                 <p className="text-xs text-muted-foreground mb-2">Emergency Hotlines:</p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: 'Police: 100', color: 'red' },
-                    { label: 'Women: 1091', color: 'purple' },
-                    { label: 'Cyber: 1930', color: 'cyan' },
+                    { label: 'Police: 100' },
+                    { label: 'Women: 1091' },
+                    { label: 'Cyber: 1930' },
                   ].map((hotline) => (
                     <span
                       key={hotline.label}
-                      className="px-2 py-1 rounded-md text-xs bg-white/5 text-muted-foreground"
+                      className="px-3 py-1.5 rounded-lg text-xs bg-white/5 border border-white/10 text-muted-foreground"
                     >
                       {hotline.label}
                     </span>
@@ -199,25 +200,26 @@ export const LegalHelpInlineBanner = ({ isVisible }: { isVisible: boolean }) => 
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-center gap-4 py-3 px-4 rounded-xl bg-white/5 border border-white/10"
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      className="flex items-center justify-center gap-4 py-4 px-6 rounded-xl bg-white/5 border border-white/10"
     >
       <div className="flex items-center gap-2">
-        <Scale className="w-4 h-4 text-cyan-400" />
+        <Scale className="w-4 h-4 text-primary" />
         <span className="text-sm text-muted-foreground">Need legal representation?</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <button
           type="button"
-          className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+          className="text-sm text-primary hover:text-primary/80 transition-colors duration-200 min-h-[44px] flex items-center"
         >
           View Advocates
         </button>
         <span className="text-muted-foreground/30">|</span>
         <button
           type="button"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 min-h-[44px] flex items-center"
         >
           Emergency Hotlines
         </button>
