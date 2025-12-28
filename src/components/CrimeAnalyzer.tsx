@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, AlertTriangle, Scale, Clock, FileText, Info } from 'lucide-react';
+import { Check, AlertTriangle, Scale, Clock, FileText, Info, ChevronDown } from 'lucide-react';
 import GlassCard from './GlassCard';
 import AnimatedCheckbox from './AnimatedCheckbox';
 import AnimatedToggle from './AnimatedToggle';
@@ -9,6 +9,9 @@ import PremiumCrimeInput from './PremiumCrimeInput';
 import { showToast } from './AnimatedToast';
 import ConfidenceIndicator from './ConfidenceIndicator';
 import ExplainabilityAccordion from './ExplainabilityAccordion';
+import AnalysisProgress from './AnalysisProgress';
+import ScrollHint from './ScrollHint';
+import { DetailLevelToggle, DetailContent, useDetailLevel, DetailLevelProvider } from './DetailLevelToggle';
 import { 
   ImportantDisclaimerCard, 
   ProbabilisticEstimateNote, 
@@ -24,21 +27,24 @@ const mockResults = {
       name: 'Cheating', 
       confidence: 92,
       matchedKeywords: ['deception', 'financial loss', 'fraudulent intent'],
-      reasoning: 'The description indicates fraudulent misrepresentation leading to financial harm.'
+      reasoning: 'The description indicates fraudulent misrepresentation leading to financial harm.',
+      isPrimary: true,
     },
     { 
       code: 'IPC 406', 
       name: 'Criminal Breach of Trust', 
       confidence: 78,
       matchedKeywords: ['trust violation', 'property misuse', 'entrustment'],
-      reasoning: 'Elements suggest violation of fiduciary duty and misappropriation.'
+      reasoning: 'Elements suggest violation of fiduciary duty and misappropriation.',
+      isPrimary: false,
     },
     { 
       code: 'IPC 468', 
       name: 'Forgery for cheating', 
       confidence: 65,
       matchedKeywords: ['false documents', 'signature forgery'],
-      reasoning: 'Potential document manipulation to facilitate the fraud.'
+      reasoning: 'Potential document manipulation to facilitate the fraud.',
+      isPrimary: false,
     },
   ],
   severity: 'Moderate',
@@ -50,26 +56,6 @@ const mockResults = {
 
 const springConfig = { damping: 20, stiffness: 300 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: 'spring', ...springConfig },
-  },
-};
-
 const caseTypes = [
   { value: 'criminal', label: 'Criminal Case' },
   { value: 'civil', label: 'Civil Case' },
@@ -78,34 +64,59 @@ const caseTypes = [
   { value: 'cyber', label: 'Cyber Crime' },
 ];
 
-const CrimeAnalyzer = () => {
+// Revelation stages for progressive disclosure
+type RevealStage = 'confidence' | 'primary' | 'related' | 'toggle' | 'scroll' | 'complete';
+
+const CrimeAnalyzerContent = () => {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<typeof mockResults | null>(null);
   const [caseType, setCaseType] = useState('');
   const [isUrgent, setIsUrgent] = useState(false);
   const [needsLawyer, setNeedsLawyer] = useState(false);
+  
+  // Reveal stages for progressive disclosure
+  const [revealStage, setRevealStage] = useState<RevealStage | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!text.trim()) return;
     
     setIsAnalyzing(true);
     setResults(null);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    
+    setRevealStage(null);
+  };
+
+  const handleAnalysisComplete = () => {
     setIsAnalyzing(false);
     setResults(mockResults);
     
-    // Show success toast with confetti
-    showToast('success', 'Analysis Complete!', 'We found 3 applicable legal sections for your case.');
+    // Progressive reveal sequence
+    setTimeout(() => setRevealStage('confidence'), 500);
+    setTimeout(() => setRevealStage('primary'), 1000);
+    setTimeout(() => setRevealStage('related'), 1500);
+    setTimeout(() => setRevealStage('toggle'), 2000);
+    setTimeout(() => setRevealStage('scroll'), 2500);
+    setTimeout(() => setRevealStage('complete'), 3000);
+    
+    showToast('success', 'Analysis Complete', 'Preliminary assessment ready for review.');
   };
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return 'text-green-400';
     if (confidence >= 60) return 'text-yellow-400';
     return 'text-orange-400';
+  };
+
+  const handleSectionClick = (code: string) => {
+    setExpandedSection(expandedSection === code ? null : code);
+  };
+
+  const isStageReached = (stage: RevealStage) => {
+    const stages: RevealStage[] = ['confidence', 'primary', 'related', 'toggle', 'scroll', 'complete'];
+    const currentIndex = revealStage ? stages.indexOf(revealStage) : -1;
+    const targetIndex = stages.indexOf(stage);
+    return currentIndex >= targetIndex;
   };
 
   return (
@@ -124,6 +135,16 @@ const CrimeAnalyzer = () => {
           <p className="text-muted-foreground text-lg">
             Describe the circumstances for preliminary statutory analysis
           </p>
+        </motion.div>
+
+        {/* Detail Level Toggle */}
+        <motion.div
+          className="flex justify-center mb-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <DetailLevelToggle />
         </motion.div>
 
         {/* Options Row */}
@@ -159,7 +180,7 @@ const CrimeAnalyzer = () => {
                 <AnimatedCheckbox
                   checked={needsLawyer}
                   onChange={setNeedsLawyer}
-                  label="Connect with lawyer"
+                  label="Connect with advocate"
                 />
               </div>
             </div>
@@ -181,237 +202,222 @@ const CrimeAnalyzer = () => {
           />
         </motion.div>
 
-        {/* Results Section */}
+        {/* Analysis Progress */}
+        <AnimatePresence>
+          {isAnalyzing && (
+            <AnalysisProgress 
+              isAnalyzing={isAnalyzing} 
+              onComplete={handleAnalysisComplete}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Results Section - Progressive Reveal */}
         <AnimatePresence mode="wait">
-          {results && (
+          {results && revealStage && (
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: 'spring', ...springConfig }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="mt-12 space-y-6"
             >
-              {/* Probabilistic estimate note */}
-              <div className="flex justify-center">
-                <ProbabilisticEstimateNote />
-              </div>
-
-              {/* Important Disclaimer Card */}
-              <ImportantDisclaimerCard />
-
-              {/* Success indicator with Overall Confidence */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', ...springConfig }}
-                className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 rounded-2xl glass"
-              >
-                <div className="flex items-center gap-3">
+              {/* Stage 1: Confidence Score */}
+              <AnimatePresence>
+                {isStageReached('confidence') && (
                   <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
-                    className="w-10 h-10 rounded-full bg-green-400/20 flex items-center justify-center"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: 'spring', ...springConfig }}
+                    className="flex flex-col items-center gap-4"
                   >
-                    <Check className="w-6 h-6 text-green-400" />
+                    <ConfidenceIndicator 
+                      score={results.overallConfidence} 
+                      size="lg"
+                      breakdown={{
+                        statutoryMatch: 88,
+                        precedentAvailability: 76,
+                        informationCompleteness: 82,
+                      }}
+                    />
+                    <ProbabilisticEstimateNote />
                   </motion.div>
-                  <div>
-                    <span className="font-medium text-green-400 text-lg">Analysis Complete</span>
-                    <p className="text-sm text-muted-foreground">
-                      Based on {results.sections.length} applicable sections
-                    </p>
-                  </div>
-                </div>
+                )}
+              </AnimatePresence>
 
-                {/* Overall Confidence Indicator */}
-                <ConfidenceIndicator 
-                  score={results.overallConfidence} 
-                  size="lg"
-                  breakdown={{
-                    statutoryMatch: 88,
-                    precedentAvailability: 76,
-                    informationCompleteness: 82,
-                  }}
-                />
-              </motion.div>
-
-              {/* Quick Stats with stagger */}
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {[
-                  { 
-                    icon: AlertTriangle, 
-                    label: 'Severity', 
-                    value: results.severity, 
-                    color: 'yellow',
-                    type: 'general' as const
-                  },
-                  { 
-                    icon: Clock, 
-                    label: 'Max Punishment', 
-                    value: results.maxPunishment, 
-                    color: 'red',
-                    note: results.punishmentNote,
-                    type: 'punishment' as const
-                  },
-                  { 
-                    icon: Scale, 
-                    label: 'Bail Status', 
-                    value: results.bail, 
-                    color: 'green',
-                    probability: results.bailProbability,
-                    type: 'bail' as const
-                  },
-                ].map((stat, index) => (
-                  <motion.div key={stat.label} variants={itemVariants}>
-                    <GlassCard index={index}>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-${stat.color}-500/20 flex items-center justify-center`}>
-                            <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">{stat.label}</p>
-                            <p className={`font-semibold text-${stat.color}-400`}>{stat.value}</p>
-                          </div>
-                        </div>
-                        
-                        {/* Probability badge for bail */}
-                        {stat.probability && (
-                          <ConfidenceBadge value={stat.probability} />
-                        )}
-                        
-                        {/* Note for punishment */}
-                        {stat.note && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Info className="w-3 h-3" />
-                            {stat.note}
-                          </p>
-                        )}
-                        
-                        {/* Uncertainty badges */}
-                        <UncertaintyBadges type={stat.type} />
-                      </div>
-                    </GlassCard>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Applicable Sections */}
-              <div className="space-y-4">
-                <motion.h3 
-                  className="text-xl font-semibold flex items-center gap-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ type: 'spring', ...springConfig, delay: 0.3 }}
-                >
-                  <FileText className="w-5 h-5 text-primary" />
-                  Applicable Legal Sections
-                </motion.h3>
-
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {results.sections.map((section, index) => (
-                    <motion.div
-                      key={section.code}
-                      variants={itemVariants}
-                      className="mb-4"
+              {/* Stage 2: Primary Section */}
+              <AnimatePresence>
+                {isStageReached('primary') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: 'spring', ...springConfig }}
+                  >
+                    <ImportantDisclaimerCard />
+                    
+                    <motion.h3 
+                      className="text-xl font-semibold flex items-center gap-2 mt-6 mb-4"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
                     >
-                      <GlassCard hover gradient index={index}>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
-                              <motion.div 
-                                className="font-mono text-lg font-bold text-primary"
-                                initial={{ opacity: 0, scale: 0.5 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ type: 'spring', ...springConfig, delay: 0.5 + index * 0.1 }}
-                              >
-                                {section.code}
-                              </motion.div>
-                              <div>
-                                <p className="font-medium">{section.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  Indian Penal Code
-                                </p>
-                              </div>
-                            </div>
+                      <FileText className="w-5 h-5 text-primary" />
+                      Primary Applicable Section
+                    </motion.h3>
 
-                            {/* Explainability Accordion */}
-                            <ExplainabilityAccordion
-                              sectionCode={section.code}
-                              sectionName={section.name}
-                              userDescription={text}
-                              matchedKeywords={section.matchedKeywords}
-                              reasoning={section.reasoning}
-                            />
-                          </div>
+                    {results.sections.filter(s => s.isPrimary).map((section) => (
+                      <SectionCard
+                        key={section.code}
+                        section={section}
+                        isExpanded={expandedSection === section.code}
+                        onToggle={() => handleSectionClick(section.code)}
+                        getConfidenceColor={getConfidenceColor}
+                        userDescription={text}
+                        isPrimary
+                      />
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                          {/* Confidence Ring */}
-                          <div className="flex-shrink-0">
-                            <div className="relative w-16 h-16">
-                              <svg className="w-full h-full transform -rotate-90">
-                                <circle
-                                  cx="32"
-                                  cy="32"
-                                  r="28"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                  fill="none"
-                                  className="text-muted/30"
-                                />
-                                <motion.circle
-                                  cx="32"
-                                  cy="32"
-                                  r="28"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  className={getConfidenceColor(section.confidence)}
-                                  initial={{ strokeDasharray: '0 176' }}
-                                  animate={{
-                                    strokeDasharray: `${(section.confidence / 100) * 176} 176`,
-                                  }}
-                                  transition={{ type: 'spring', damping: 25, stiffness: 100, delay: 0.6 + index * 0.1 }}
-                                />
-                              </svg>
-                              <motion.span
-                                className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${getConfidenceColor(section.confidence)}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ type: 'spring', ...springConfig, delay: 1 + index * 0.1 }}
-                              >
-                                {section.confidence}%
-                              </motion.span>
+              {/* Stage 3: Related Sections */}
+              <AnimatePresence>
+                {isStageReached('related') && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <motion.h3 
+                      className="text-lg font-semibold flex items-center gap-2 mb-4 text-muted-foreground"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                    >
+                      Related Sections
+                    </motion.h3>
+
+                    {results.sections.filter(s => !s.isPrimary).map((section, index) => (
+                      <motion.div
+                        key={section.code}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.2 }}
+                      >
+                        <SectionCard
+                          section={section}
+                          isExpanded={expandedSection === section.code}
+                          onToggle={() => handleSectionClick(section.code)}
+                          getConfidenceColor={getConfidenceColor}
+                          userDescription={text}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Stage 4: Quick Stats (with toggle active indicator) */}
+              <AnimatePresence>
+                {isStageReached('toggle') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <DetailContent
+                      simple={
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { label: 'Severity', value: results.severity, color: 'yellow' },
+                            { label: 'Punishment', value: results.maxPunishment, color: 'red' },
+                            { label: 'Bail', value: results.bail, color: 'green' },
+                          ].map((stat) => (
+                            <div key={stat.label} className="text-center p-3 rounded-xl glass">
+                              <p className="text-xs text-muted-foreground">{stat.label}</p>
+                              <p className={`font-semibold text-sm text-${stat.color}-400`}>{stat.value}</p>
                             </div>
-                          </div>
+                          ))}
                         </div>
-                      </GlassCard>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
+                      }
+                      detailed={
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {[
+                            { icon: AlertTriangle, label: 'Severity', value: results.severity, color: 'yellow', type: 'general' as const },
+                            { icon: Clock, label: 'Max Punishment', value: results.maxPunishment, color: 'red', note: results.punishmentNote, type: 'punishment' as const },
+                            { icon: Scale, label: 'Bail Status', value: results.bail, color: 'green', probability: results.bailProbability, type: 'bail' as const },
+                          ].map((stat, index) => (
+                            <motion.div 
+                              key={stat.label}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                            >
+                              <GlassCard index={index}>
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-lg bg-${stat.color}-500/20 flex items-center justify-center`}>
+                                      <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                      <p className={`font-semibold text-${stat.color}-400`}>{stat.value}</p>
+                                    </div>
+                                  </div>
+                                  {stat.probability && <ConfidenceBadge value={stat.probability} />}
+                                  {stat.note && (
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <Info className="w-3 h-3" />{stat.note}
+                                    </p>
+                                  )}
+                                  <UncertaintyBadges type={stat.type} />
+                                </div>
+                              </GlassCard>
+                            </motion.div>
+                          ))}
+                        </div>
+                      }
+                    />
 
-              {/* Based on similar cases note */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.2 }}
-                className="text-center p-4 rounded-xl bg-white/5 border border-white/10"
-              >
-                <p className="text-sm text-muted-foreground">
-                  💡 Analysis based on similar cases, not a guarantee. Individual outcomes may vary based on 
-                  specific circumstances, evidence presented, and judicial interpretation.
-                </p>
-              </motion.div>
+                    {/* Viewing indicator */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-center mt-4"
+                    >
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs text-primary">
+                        <Info className="w-3 h-3" />
+                        Viewing preliminary assessment
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Stage 5: Scroll Hint */}
+              <AnimatePresence>
+                {isStageReached('scroll') && !isStageReached('complete') && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex justify-center pt-4"
+                  >
+                    <ScrollHint targetId="timeline" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Final note */}
+              <AnimatePresence>
+                {isStageReached('complete') && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center p-4 rounded-xl bg-white/5 border border-white/10"
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      This preliminary assessment is based on the information provided. 
+                      Individual outcomes may vary based on specific circumstances and evidence.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>
@@ -419,5 +425,150 @@ const CrimeAnalyzer = () => {
     </section>
   );
 };
+
+// Section Card Component with Accordion behavior
+interface SectionCardProps {
+  section: typeof mockResults.sections[0];
+  isExpanded: boolean;
+  onToggle: () => void;
+  getConfidenceColor: (c: number) => string;
+  userDescription: string;
+  isPrimary?: boolean;
+}
+
+const SectionCard = ({ 
+  section, 
+  isExpanded, 
+  onToggle, 
+  getConfidenceColor, 
+  userDescription,
+  isPrimary 
+}: SectionCardProps) => {
+  // Auto-scroll when expanded
+  useEffect(() => {
+    if (isExpanded) {
+      setTimeout(() => {
+        document.getElementById(`section-${section.code}`)?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 100);
+    }
+  }, [isExpanded, section.code]);
+
+  return (
+    <motion.div
+      id={`section-${section.code}`}
+      className="mb-4"
+      layout
+    >
+      <GlassCard 
+        hover 
+        gradient={isPrimary} 
+        variant={isPrimary ? 'strong' : 'default'}
+      >
+        <div 
+          className="cursor-pointer"
+          onClick={onToggle}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-2">
+                <span className="font-mono text-lg font-bold text-primary">
+                  {section.code}
+                </span>
+                <div>
+                  <p className="font-medium">{section.name}</p>
+                  <p className="text-sm text-muted-foreground">Indian Penal Code</p>
+                </div>
+              </div>
+
+              {/* Expand indicator */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </motion.div>
+                <span>{isExpanded ? 'Click to collapse' : 'Click for details'}</span>
+              </div>
+            </div>
+
+            {/* Confidence Ring */}
+            <div className="flex-shrink-0">
+              <div className="relative w-16 h-16">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    className="text-muted/30"
+                  />
+                  <motion.circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeLinecap="round"
+                    className={getConfidenceColor(section.confidence)}
+                    initial={{ strokeDasharray: '0 176' }}
+                    animate={{
+                      strokeDasharray: `${(section.confidence / 100) * 176} 176`,
+                    }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 100 }}
+                  />
+                </svg>
+                <span className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${getConfidenceColor(section.confidence)}`}>
+                  {section.confidence}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Expandable content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                className="pt-4 mt-4 border-t border-white/10"
+              >
+                <ExplainabilityAccordion
+                  sectionCode={section.code}
+                  sectionName={section.name}
+                  userDescription={userDescription}
+                  matchedKeywords={section.matchedKeywords}
+                  reasoning={section.reasoning}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </GlassCard>
+    </motion.div>
+  );
+};
+
+// Wrap with provider
+const CrimeAnalyzer = () => (
+  <DetailLevelProvider>
+    <CrimeAnalyzerContent />
+  </DetailLevelProvider>
+);
 
 export default CrimeAnalyzer;

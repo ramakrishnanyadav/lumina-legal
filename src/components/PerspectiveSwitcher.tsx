@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { User, Shield, AlertCircle, CheckCircle, Phone, FileText, Scale, Gavel } from 'lucide-react';
+import { User, Shield, AlertCircle, CheckCircle, Phone, FileText, Scale, Gavel, Info } from 'lucide-react';
 import GlassCard from './GlassCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -18,10 +18,10 @@ const victimContent = {
   glowColor: 'rgba(249, 115, 22, 0.5)',
   bgGradient: 'radial-gradient(ellipse at 30% 50%, rgba(249, 115, 22, 0.15) 0%, transparent 50%)',
   steps: [
-    { icon: Phone, title: 'Emergency Contact', description: 'Call 100 or visit nearest police station immediately' },
-    { icon: FileText, title: 'File FIR', description: 'Lodge First Information Report within 24 hours' },
-    { icon: Shield, title: 'Legal Protection', description: 'Seek protection order if you feel threatened' },
-    { icon: CheckCircle, title: 'Gather Evidence', description: 'Collect documents, witnesses, and records' },
+    { icon: Phone, title: 'Emergency Contact', description: 'Contact local police or dial emergency helpline' },
+    { icon: FileText, title: 'File FIR', description: 'Lodge First Information Report at nearest police station' },
+    { icon: Shield, title: 'Legal Protection', description: 'Request protection order if safety is a concern' },
+    { icon: CheckCircle, title: 'Document Evidence', description: 'Preserve documents, communications, and witness information' },
   ],
 };
 
@@ -32,14 +32,38 @@ const accusedContent = {
   glowColor: 'rgba(59, 130, 246, 0.5)',
   bgGradient: 'radial-gradient(ellipse at 70% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)',
   steps: [
-    { icon: Phone, title: 'Right to Counsel', description: 'Contact a lawyer immediately upon detention' },
-    { icon: Shield, title: 'Right to Silence', description: 'You can refuse to answer self-incriminating questions' },
-    { icon: FileText, title: 'Bail Application', description: 'Apply for bail if the offense is bailable' },
-    { icon: Gavel, title: 'Fair Trial', description: 'Right to be presumed innocent until proven guilty' },
+    { icon: Phone, title: 'Right to Counsel', description: 'Contact an advocate before making any statements' },
+    { icon: Shield, title: 'Right to Silence', description: 'You may decline to answer self-incriminating questions' },
+    { icon: FileText, title: 'Bail Application', description: 'Apply for bail through your advocate if eligible' },
+    { icon: Gavel, title: 'Fair Process', description: 'Right to be informed of charges and presumption of innocence' },
   ],
 };
 
 const springConfig = { damping: 20, stiffness: 300 };
+
+// Slide variants for panel transitions
+const slideVariants = {
+  enterFromRight: {
+    x: 300,
+    opacity: 0,
+  },
+  enterFromLeft: {
+    x: -300,
+    opacity: 0,
+  },
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exitToLeft: {
+    x: -300,
+    opacity: 0,
+  },
+  exitToRight: {
+    x: 300,
+    opacity: 0,
+  },
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -76,11 +100,20 @@ const itemVariants = {
 
 const PerspectiveSwitcher = () => {
   const [perspective, setPerspective] = useState<'victim' | 'accused'>('victim');
+  const [prevPerspective, setPrevPerspective] = useState<'victim' | 'accused'>('victim');
   const [particles, setParticles] = useState<Particle[]>([]);
   const isMobile = useIsMobile();
 
   const content = perspective === 'victim' ? victimContent : accusedContent;
   const ContentIcon = content.icon;
+
+  // Determine slide direction
+  const getSlideDirection = () => {
+    if (perspective === 'accused' && prevPerspective === 'victim') {
+      return { initial: 'enterFromRight', exit: 'exitToLeft' };
+    }
+    return { initial: 'enterFromLeft', exit: 'exitToRight' };
+  };
 
   // Particle burst effect
   const triggerParticleBurst = useCallback((e: React.MouseEvent) => {
@@ -106,6 +139,7 @@ const PerspectiveSwitcher = () => {
   const handleSwitch = (newPerspective: 'victim' | 'accused', e: React.MouseEvent) => {
     if (newPerspective !== perspective) {
       triggerParticleBurst(e);
+      setPrevPerspective(perspective);
       setPerspective(newPerspective);
     }
   };
@@ -113,11 +147,15 @@ const PerspectiveSwitcher = () => {
   // Mobile swipe handler
   const handleSwipeEnd = (_: any, info: PanInfo) => {
     if (info.offset.x > 100 && perspective === 'accused') {
+      setPrevPerspective(perspective);
       setPerspective('victim');
     } else if (info.offset.x < -100 && perspective === 'victim') {
+      setPrevPerspective(perspective);
       setPerspective('accused');
     }
   };
+
+  const slideDirection = getSlideDirection();
 
   return (
     <section className="py-24 px-4 relative overflow-hidden">
@@ -287,13 +325,14 @@ const PerspectiveSwitcher = () => {
             </motion.div>
           )}
           
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={perspective}
-              initial={{ opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              variants={slideVariants}
+              initial={slideDirection.initial}
+              animate="center"
+              exit={slideDirection.exit}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             >
             <div 
               className="relative rounded-3xl overflow-hidden"
@@ -383,23 +422,26 @@ const PerspectiveSwitcher = () => {
                   ))}
                 </motion.div>
 
-                {/* Bottom CTA */}
+                {/* Bottom CTA with viewing indicator */}
                 <motion.div
                   className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', ...springConfig, delay: 0.4 }}
                 >
-                  <p className="text-sm text-muted-foreground">
-                    Need personalized legal advice for your situation?
-                  </p>
+                  {/* Viewing indicator */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-sm text-muted-foreground">
+                    <Info className="w-4 h-4" />
+                    <span>Viewing as: <strong className="text-foreground">{perspective === 'victim' ? 'Victim' : 'Accused'}</strong></span>
+                  </div>
+                  
                   <motion.button
                     className={`px-6 py-3 rounded-xl font-semibold bg-gradient-to-r ${content.gradient} text-white`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     style={{ boxShadow: `0 4px 20px ${content.glowColor}` }}
                   >
-                    Connect with Lawyer
+                    Connect with Advocate
                   </motion.button>
                 </motion.div>
               </div>
