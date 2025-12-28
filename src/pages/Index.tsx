@@ -17,6 +17,8 @@ import MobileNavigation from '@/components/MobileNavigation';
 import Floating3DObjects from '@/components/Floating3DObjects';
 import { ToastProvider } from '@/components/PremiumToast';
 import { PerformanceProvider } from '@/components/MobileOptimizations';
+
+const Index = () => {
   const isMobile = useIsMobile();
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
