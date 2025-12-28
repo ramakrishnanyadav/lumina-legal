@@ -12,6 +12,9 @@ import SoundToggle from '@/components/SoundToggle';
 import { EasterEggProvider } from '@/components/EasterEggs';
 import { SeasonalProvider } from '@/components/SeasonalThemes';
 import { LazyLoader, SectionSkeleton, Deferred, Progressive } from '@/components/PerformanceWrapper';
+import { AccessibilityProvider } from '@/components/AccessibilityProvider';
+import { SkipToContent } from '@/components/AccessibilityComponents';
+import AccessibilityPanel from '@/components/AccessibilityPanel';
 
 // Lazy load heavy components
 const ParticleBackground = lazy(() => import('@/components/ParticleBackground'));
@@ -25,7 +28,7 @@ const CustomCursor = lazy(() => import('@/components/CustomCursor'));
 
 // Memoized background gradient
 const BackgroundGradient = memo(() => (
-  <div className="fixed inset-0 pointer-events-none overflow-hidden">
+  <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
     <div 
       className="absolute inset-0"
       style={{
@@ -48,94 +51,104 @@ const Index = () => {
   const { shouldAnimate, shouldUseHeavyEffects } = usePerformanceMode();
   
   return (
-    <AudioProvider>
-      <EasterEggProvider>
-        <SeasonalProvider>
-          <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
-            {/* Custom cursor - desktop only with performance check */}
-            {!isMobile && shouldUseHeavyEffects && (
-              <LazyLoader>
-                <CustomCursor />
-              </LazyLoader>
-            )}
-            
-            {/* Toast notifications - deferred */}
-            <Deferred delay={500}>
-              <LazyLoader>
-                <AnimatedToast />
-              </LazyLoader>
-            </Deferred>
-            
-            {/* Sound toggle */}
-            <SoundToggle />
-            
-            {/* Background - simplified on low-end devices */}
-            <BackgroundGradient />
-
-            {/* Scroll spotlight effect - only on capable devices */}
-            <Progressive
-              children={null}
-              enhancedChildren={<ScrollSpotlight />}
-            />
-
-            {/* Particle effects - only on capable devices */}
-            {shouldUseHeavyEffects && (
-              <LazyLoader>
-                <ParticleBackground />
-              </LazyLoader>
-            )}
-            
-            <ScrollProgress />
-            
-            {/* Navigation */}
-            <Navbar />
-            
-            {/* Main Content */}
-            <main className="relative z-10">
-              <HeroSection />
+    <AccessibilityProvider>
+      <AudioProvider>
+        <EasterEggProvider>
+          <SeasonalProvider>
+            <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
+              {/* Skip to content link for keyboard users */}
+              <SkipToContent />
               
-              <ScrollReveal type="scale">
-                <LazyLoader fallback={<SectionSkeleton rows={2} />}>
-                  <CrimeAnalyzer />
+              {/* Accessibility settings panel */}
+              <AccessibilityPanel />
+              
+              {/* Custom cursor - desktop only with performance check */}
+              {!isMobile && shouldUseHeavyEffects && (
+                <LazyLoader>
+                  <CustomCursor />
                 </LazyLoader>
-              </ScrollReveal>
+              )}
               
-              <ScrollReveal type="fade" delay={0.1}>
-                <LazyLoader fallback={<SectionSkeleton rows={2} />}>
-                  <PerspectiveSwitcher />
+              {/* Toast notifications - deferred */}
+              <Deferred delay={500}>
+                <LazyLoader>
+                  <AnimatedToast />
                 </LazyLoader>
-              </ScrollReveal>
+              </Deferred>
               
-              <section id="timeline">
-                <ScrollReveal type={shouldAnimate ? "slide" : "fade"}>
-                  <LazyLoader fallback={<SectionSkeleton rows={4} />}>
-                    <ProceduralTimeline />
+              {/* Sound toggle */}
+              <SoundToggle />
+              
+              {/* Background - simplified on low-end devices */}
+              <BackgroundGradient />
+
+              {/* Scroll spotlight effect - only on capable devices */}
+              <Progressive
+                children={null}
+                enhancedChildren={<ScrollSpotlight />}
+              />
+
+              {/* Particle effects - only on capable devices */}
+              {shouldUseHeavyEffects && (
+                <LazyLoader>
+                  <ParticleBackground />
+                </LazyLoader>
+              )}
+              
+              <ScrollProgress />
+              
+              {/* Navigation */}
+              <header role="banner">
+                <Navbar />
+              </header>
+              
+              {/* Main Content */}
+              <main id="main-content" role="main" className="relative z-10">
+                <HeroSection />
+                
+                <ScrollReveal type="scale">
+                  <LazyLoader fallback={<SectionSkeleton rows={2} />}>
+                    <CrimeAnalyzer />
                   </LazyLoader>
                 </ScrollReveal>
-              </section>
-              
-              <section id="lawyers">
-                <ScrollReveal type="scale" delay={0.1}>
-                  <LazyLoader fallback={<SectionSkeleton rows={3} />}>
-                    <LawyerMarketplace />
+                
+                <ScrollReveal type="fade" delay={0.1}>
+                  <LazyLoader fallback={<SectionSkeleton rows={2} />}>
+                    <PerspectiveSwitcher />
                   </LazyLoader>
                 </ScrollReveal>
-              </section>
-            </main>
-            
-            {/* Footer */}
-            <Footer />
-            
-            {/* Floating Elements - deferred */}
-            <Deferred delay={1000}>
-              <LazyLoader>
-                <FloatingAIChat />
-              </LazyLoader>
-            </Deferred>
-          </div>
-        </SeasonalProvider>
-      </EasterEggProvider>
-    </AudioProvider>
+                
+                <section id="timeline" aria-label="Legal timeline">
+                  <ScrollReveal type={shouldAnimate ? "slide" : "fade"}>
+                    <LazyLoader fallback={<SectionSkeleton rows={4} />}>
+                      <ProceduralTimeline />
+                    </LazyLoader>
+                  </ScrollReveal>
+                </section>
+                
+                <section id="lawyers" aria-label="Lawyer marketplace">
+                  <ScrollReveal type="scale" delay={0.1}>
+                    <LazyLoader fallback={<SectionSkeleton rows={3} />}>
+                      <LawyerMarketplace />
+                    </LazyLoader>
+                  </ScrollReveal>
+                </section>
+              </main>
+              
+              {/* Footer */}
+              <Footer />
+              
+              {/* Floating Elements - deferred */}
+              <Deferred delay={1000}>
+                <LazyLoader>
+                  <FloatingAIChat />
+                </LazyLoader>
+              </Deferred>
+            </div>
+          </SeasonalProvider>
+        </EasterEggProvider>
+      </AudioProvider>
+    </AccessibilityProvider>
   );
 };
 
