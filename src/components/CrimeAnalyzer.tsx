@@ -119,10 +119,10 @@ const CrimeAnalyzer = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">AI Crime Analyzer</span>
+            <span className="gradient-text">Situation Assessment</span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Describe the situation and our AI will identify applicable legal sections
+            Describe the circumstances for preliminary statutory analysis
           </p>
         </motion.div>
 

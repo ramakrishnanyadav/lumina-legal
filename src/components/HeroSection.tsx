@@ -4,7 +4,6 @@ import AnimatedButton from './AnimatedButton';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
 import TextReveal from './TextReveal';
-import NumberCounter from './NumberCounter';
 import { ParallaxLayer } from './ParallaxSection';
 import MorphingBlob from './MorphingBlob';
 
@@ -152,7 +151,7 @@ const HeroSection = () => {
         {/* Animated heading with split text */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
           <TextReveal 
-            text="Know Your Legal Rights Instantly" 
+            text="Understand Your Legal Position" 
             type="letter"
             stagger={0.03}
             className="inline"
@@ -179,7 +178,7 @@ const HeroSection = () => {
           transition={{ type: 'spring', ...springConfig, delay: 1.8 }}
         >
           <TextReveal
-            text="Understand complex legal situations with AI. Get instant analysis of applicable laws, your rights, and recommended next steps."
+            text="AI-powered legal information based on Indian criminal law. Receive preliminary analysis of applicable statutes and procedural guidance."
             type="word"
             stagger={0.03}
             delay={2}
@@ -200,11 +199,11 @@ const HeroSection = () => {
             icon={<ArrowRight className="w-5 h-5" />}
             onClick={() => document.getElementById('analyzer')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            Analyze Your Case
+            Begin Analysis
           </AnimatedButton>
 
           <AnimatedButton variant="secondary" size="lg">
-            How It Works
+            View Process
           </AnimatedButton>
         </motion.div>
 
@@ -222,7 +221,7 @@ const HeroSection = () => {
             transition={{ type: 'spring', ...springConfig, delay: 2.9 }}
           >
             <Shield className="w-5 h-5 text-primary" />
-            <span className="text-sm">100% Confidential</span>
+            <span className="text-sm">Secure & Confidential</span>
           </motion.div>
           
           <motion.div 
@@ -232,9 +231,7 @@ const HeroSection = () => {
             transition={{ type: 'spring', ...springConfig, delay: 3.0 }}
           >
             <Scale className="w-5 h-5 text-secondary" />
-            <span className="text-sm">
-              <NumberCounter value={10000} suffix="+" className="font-bold" /> Cases Analyzed
-            </span>
+            <span className="text-sm">Based on IPC & CrPC Database</span>
           </motion.div>
           
           <motion.div 
@@ -244,9 +241,7 @@ const HeroSection = () => {
             transition={{ type: 'spring', ...springConfig, delay: 3.1 }}
           >
             <Gavel className="w-5 h-5 text-accent" />
-            <span className="text-sm">
-              <NumberCounter value={500} suffix="+" className="font-bold" /> Legal Experts
-            </span>
+            <span className="text-sm">Advocate-Reviewed Framework</span>
           </motion.div>
         </motion.div>
       </motion.div>

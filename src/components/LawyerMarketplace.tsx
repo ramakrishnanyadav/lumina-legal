@@ -267,10 +267,10 @@ const LawyerMarketplace = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">Expert Legal Counsel</span>
+            <span className="gradient-text">Legal Assistance</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Connect with verified legal experts specializing in your case type
+            Connect with verified advocates specializing in relevant practice areas
           </p>
         </motion.div>
 
@@ -296,7 +296,7 @@ const LawyerMarketplace = () => {
           transition={{ type: 'spring', ...springConfig, delay: 0.5 }}
         >
           <AnimatedButton variant="primary" size="lg">
-            View All 500+ Lawyers
+            Browse All Advocates
           </AnimatedButton>
         </motion.div>
       </div>
