@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, AlertTriangle, Scale, Clock, FileText, Info, ChevronDown } from 'lucide-react';
 import GlassCard from './GlassCard';
 import AnimatedCheckbox from './AnimatedCheckbox';
-import AnimatedToggle from './AnimatedToggle';
 import AnimatedDropdown from './AnimatedDropdown';
 import PremiumCrimeInput from './PremiumCrimeInput';
 import { showToast } from './AnimatedToast';
@@ -18,6 +17,9 @@ import {
   UncertaintyBadges,
   ConfidenceBadge 
 } from './DisclaimerSystem';
+import EvidenceChecklist from './EvidenceChecklist';
+import FIRTemplatePreview from './FIRTemplatePreview';
+import UrgencyIndicator from './UrgencyIndicator';
 
 const mockResults = {
   overallConfidence: 82,
@@ -170,10 +172,9 @@ const CrimeAnalyzerContent = () => {
                 placeholder="Select case type"
               />
               <div className="flex items-center justify-center">
-                <AnimatedToggle
-                  checked={isUrgent}
-                  onChange={setIsUrgent}
-                  label="Mark as Urgent"
+                <UrgencyIndicator
+                  isUrgent={isUrgent}
+                  onToggle={setIsUrgent}
                 />
               </div>
               <div className="flex items-center justify-center md:justify-end">
@@ -403,12 +404,47 @@ const CrimeAnalyzerContent = () => {
                 )}
               </AnimatePresence>
 
+              {/* Evidence Checklist */}
+              <AnimatePresence>
+                {isStageReached('complete') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <EvidenceChecklist crimeType={results.sections[0]?.name || caseType || 'general'} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* FIR Template */}
+              <AnimatePresence>
+                {isStageReached('complete') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <FIRTemplatePreview
+                      userDescription={text}
+                      primarySection={{
+                        code: results.sections[0]?.code || 'IPC',
+                        name: results.sections[0]?.name || 'Unknown',
+                      }}
+                      relatedSections={results.sections.slice(1).map(s => ({ code: s.code, name: s.name }))}
+                      caseType={caseType}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Final note */}
               <AnimatePresence>
                 {isStageReached('complete') && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
                     className="text-center p-4 rounded-xl bg-white/5 border border-white/10"
                   >
                     <p className="text-sm text-muted-foreground">
