@@ -77,18 +77,18 @@ const Navbar = () => {
           </motion.a>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <motion.a
                 key={link.label}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors relative"
-                whileHover={{ y: -2 }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative py-1"
+                whileHover={{ y: -1 }}
                 transition={{ type: 'spring', ...springConfig }}
               >
                 {link.label}
                 <motion.span
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full"
+                  className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-primary rounded-full origin-left"
                   initial={{ scaleX: 0 }}
                   whileHover={{ scaleX: 1 }}
                   transition={{ type: 'spring', ...springConfig }}
