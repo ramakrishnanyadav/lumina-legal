@@ -88,20 +88,20 @@ export const SmartSuggestions = ({ wordCount }: { wordCount: number }) => {
       return {
         icon: '✓',
         text: 'Good start! Add more details about: when, where, who was involved',
-        color: 'text-cyan-400',
+        color: 'text-primary',
       };
     }
     if (wordCount < 50) {
       return {
         icon: '✓',
         text: 'Getting better! Consider adding: what evidence you have',
-        color: 'text-cyan-400',
+        color: 'text-primary',
       };
     }
     return {
       icon: '✓',
       text: 'Excellent detail! You can analyze now or add more context',
-      color: 'text-emerald-400',
+      color: 'text-success',
     };
   };
 
@@ -111,9 +111,10 @@ export const SmartSuggestions = ({ wordCount }: { wordCount: number }) => {
     <AnimatePresence>
       {suggestion && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           className={`flex items-center gap-2 text-sm ${suggestion.color}`}
         >
           <span>{suggestion.icon}</span>
@@ -144,10 +145,11 @@ export const AutoSaveIndicator = ({ lastTypedAt }: { lastTypedAt: number }) => {
     <AnimatePresence>
       {showSaved && (
         <motion.div
-          initial={{ opacity: 0, y: 5 }}
+          initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 5 }}
-          className="flex items-center gap-1.5 text-xs text-emerald-400"
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="flex items-center gap-2 text-xs text-success"
         >
           <Check className="w-3 h-3" />
           <span>Auto-saved</span>
@@ -167,7 +169,7 @@ export const CategoryTags = ({ selectedCategories, onToggle }: CategoryTagsProps
   const [hoveredTag, setHoveredTag] = useState<string | null>(null);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <p className="text-sm text-muted-foreground">What type of situation? (optional - helps accuracy)</p>
       <div className="flex flex-wrap gap-2">
         {categoryTags.map((tag) => {
@@ -179,9 +181,9 @@ export const CategoryTags = ({ selectedCategories, onToggle }: CategoryTagsProps
                 onClick={() => onToggle(tag.id)}
                 onMouseEnter={() => setHoveredTag(tag.id)}
                 onMouseLeave={() => setHoveredTag(null)}
-                className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-all border ${
+                className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all duration-200 border min-h-[44px] ${
                   isSelected
-                    ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                    ? 'bg-primary/20 border-primary/50 text-primary'
                     : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10'
                 }`}
                 whileHover={{ scale: 1.02 }}
@@ -194,10 +196,11 @@ export const CategoryTags = ({ selectedCategories, onToggle }: CategoryTagsProps
               <AnimatePresence>
                 {hoveredTag === tag.id && (
                   <motion.div
-                    initial={{ opacity: 0, y: 5 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-lg bg-background border border-border shadow-lg text-xs whitespace-nowrap z-20"
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-background border border-border shadow-lg text-xs whitespace-nowrap z-20"
                   >
                     {tag.tooltip}
                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-background border-r border-b border-border" />
@@ -240,15 +243,15 @@ export const FileUpload = ({ files, onAdd, onRemove }: FileUploadProps) => {
   }, []);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Drop zone */}
       <motion.div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-colors cursor-pointer ${
+        className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 cursor-pointer ${
           isDragging
-            ? 'border-cyan-500/50 bg-cyan-500/10'
+            ? 'border-primary/50 bg-primary/10'
             : 'border-white/10 hover:border-white/20 bg-white/5'
         }`}
         whileHover={{ scale: 1.01 }}
@@ -260,10 +263,10 @@ export const FileUpload = ({ files, onAdd, onRemove }: FileUploadProps) => {
           onChange={(e) => e.target.files && onAdd(e.target.files)}
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
-        <div className="flex flex-col items-center gap-2">
-          <Upload className="w-5 h-5 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-3">
+          <Upload className="w-6 h-6 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            <span className="text-cyan-400">📎 Attach evidence</span> (photos, documents, screenshots)
+            <span className="text-primary">📎 Attach evidence</span> (photos, documents, screenshots)
           </p>
           <p className="text-xs text-muted-foreground/70">JPG, PNG, PDF • Max 10MB each • Up to 5 files</p>
         </div>
@@ -275,14 +278,15 @@ export const FileUpload = ({ files, onAdd, onRemove }: FileUploadProps) => {
           {files.map((file, index) => (
             <motion.div
               key={`${file.name}-${index}`}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative group flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10"
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="relative group flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10"
             >
               {file.type.startsWith('image/') ? (
-                <Image className="w-4 h-4 text-cyan-400" />
+                <Image className="w-4 h-4 text-primary" />
               ) : (
-                <FileText className="w-4 h-4 text-amber-400" />
+                <FileText className="w-4 h-4 text-warning" />
               )}
               <span className="text-sm text-muted-foreground max-w-[120px] truncate">
                 {file.name}
@@ -290,9 +294,9 @@ export const FileUpload = ({ files, onAdd, onRemove }: FileUploadProps) => {
               <button
                 type="button"
                 onClick={() => onRemove(index)}
-                className="ml-1 p-1 rounded-full hover:bg-red-500/20 transition-colors"
+                className="ml-1 p-1.5 rounded-full hover:bg-destructive/20 transition-colors duration-200 min-h-[32px] min-w-[32px] flex items-center justify-center"
               >
-                <X className="w-3 h-3 text-red-400" />
+                <X className="w-3 h-3 text-destructive" />
               </button>
             </motion.div>
           ))}
@@ -308,7 +312,7 @@ export const ExampleButton = ({ onFill }: { onFill: () => void }) => {
     <motion.button
       type="button"
       onClick={onFill}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground bg-transparent hover:bg-white/5 border border-white/10 transition-all"
+      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground bg-transparent hover:bg-white/5 border border-white/10 transition-all duration-200 min-h-[44px]"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
@@ -334,11 +338,11 @@ export const ClearButton = ({ onClear, hasContent }: ClearButtonProps) => {
       <motion.button
         type="button"
         onClick={() => setShowConfirm(true)}
-        className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 hover:bg-red-500/20 border border-white/10 transition-colors"
+        className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 hover:bg-destructive/20 border border-white/10 transition-colors duration-200"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <X className="w-4 h-4 text-muted-foreground hover:text-red-400" />
+        <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
       </motion.button>
 
       <AnimatePresence>
@@ -347,9 +351,10 @@ export const ClearButton = ({ onClear, hasContent }: ClearButtonProps) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="absolute top-full right-0 mt-2 p-3 rounded-xl bg-background border border-border shadow-xl z-30"
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute top-full right-0 mt-2 p-4 rounded-xl bg-background border border-border shadow-xl z-30"
           >
-            <p className="text-sm text-foreground mb-3">Clear your description?</p>
+            <p className="text-sm text-foreground mb-4">Clear your description?</p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -357,14 +362,14 @@ export const ClearButton = ({ onClear, hasContent }: ClearButtonProps) => {
                   onClear();
                   setShowConfirm(false);
                 }}
-                className="px-3 py-1.5 rounded-lg text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                className="px-4 py-2 rounded-xl text-sm bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors duration-200 min-h-[44px]"
               >
                 Clear
               </button>
               <button
                 type="button"
                 onClick={() => setShowConfirm(false)}
-                className="px-3 py-1.5 rounded-lg text-sm bg-white/5 text-muted-foreground hover:bg-white/10 transition-colors"
+                className="px-4 py-2 rounded-xl text-sm bg-white/5 text-muted-foreground hover:bg-white/10 transition-colors duration-200 min-h-[44px]"
               >
                 Cancel
               </button>
