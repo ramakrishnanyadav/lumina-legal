@@ -2,7 +2,7 @@ import ParticleBackground from '@/components/ParticleBackground';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import CrimeAnalyzer from '@/components/CrimeAnalyzer';
-import PerspectiveToggle from '@/components/PerspectiveToggle';
+import PerspectiveSwitcher from '@/components/PerspectiveSwitcher';
 import ProceduralTimeline from '@/components/ProceduralTimeline';
 import LawyerMarketplace from '@/components/LawyerMarketplace';
 import FloatingAIChat from '@/components/FloatingAIChat';
@@ -53,7 +53,7 @@ const Index = () => {
       <main className="relative z-10">
         <HeroSection />
         <CrimeAnalyzer />
-        <PerspectiveToggle />
+        <PerspectiveSwitcher />
         <section id="timeline">
           <ProceduralTimeline />
         </section>
