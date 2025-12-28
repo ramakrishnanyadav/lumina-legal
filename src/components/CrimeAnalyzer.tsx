@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Check, AlertTriangle, Scale, Clock, FileText } from 'lucide-react';
-import AnimatedButton from './AnimatedButton';
+import { Check, AlertTriangle, Scale, Clock, FileText } from 'lucide-react';
 import GlassCard from './GlassCard';
-import FloatingInput from './FloatingInput';
 import AnimatedCheckbox from './AnimatedCheckbox';
 import AnimatedToggle from './AnimatedToggle';
 import AnimatedDropdown from './AnimatedDropdown';
+import PremiumCrimeInput from './PremiumCrimeInput';
 import { showToast } from './AnimatedToast';
 
 const mockResults = {
@@ -54,7 +53,6 @@ const CrimeAnalyzer = () => {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<typeof mockResults | null>(null);
-  const [isFocused, setIsFocused] = useState(false);
   const [caseType, setCaseType] = useState('');
   const [isUrgent, setIsUrgent] = useState(false);
   const [needsLawyer, setNeedsLawyer] = useState(false);
@@ -99,84 +97,59 @@ const CrimeAnalyzer = () => {
           </p>
         </motion.div>
 
-        {/* Input Section */}
+        {/* Options Row */}
         <motion.div
-          className="relative"
-          initial={{ opacity: 0, y: 30 }}
+          className="mb-6"
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
+          transition={{ type: 'spring', ...springConfig, delay: 0.1 }}
         >
-          {/* Animated gradient border */}
-          <motion.div
-            className="absolute -inset-[2px] rounded-2xl"
+          <div 
+            className="rounded-xl p-4"
             style={{
-              background: 'linear-gradient(135deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%))',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
             }}
-            animate={{ opacity: isFocused ? 1 : 0.3 }}
-            transition={{ type: 'spring', ...springConfig }}
-          />
-
-          <div className="relative glass rounded-2xl p-6">
-            {/* Case type dropdown and options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               <AnimatedDropdown
                 options={caseTypes}
                 value={caseType}
                 onChange={setCaseType}
                 placeholder="Select case type"
               />
-              <div className="flex items-center gap-6">
+              <div className="flex items-center justify-center">
                 <AnimatedToggle
                   checked={isUrgent}
                   onChange={setIsUrgent}
-                  label="Urgent"
+                  label="Mark as Urgent"
                 />
+              </div>
+              <div className="flex items-center justify-center md:justify-end">
                 <AnimatedCheckbox
                   checked={needsLawyer}
                   onChange={setNeedsLawyer}
-                  label="Need lawyer"
+                  label="Connect with lawyer"
                 />
               </div>
             </div>
-
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="Describe the legal situation in detail. For example: 'A person took money promising to return with interest but has been avoiding contact for 6 months...'"
-              className="w-full h-48 bg-transparent border-none outline-none resize-none text-foreground placeholder:text-muted-foreground/50 text-lg"
-            />
-
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-              <motion.span
-                className="text-sm text-muted-foreground"
-                animate={{ opacity: text.length > 0 ? 1 : 0.5 }}
-                transition={{ type: 'spring', ...springConfig }}
-              >
-                <motion.span
-                  key={text.length}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: 'spring', ...springConfig }}
-                  className="text-primary font-mono"
-                >
-                  {text.length}
-                </motion.span>
-                {' / 2000 characters'}
-              </motion.span>
-
-              <AnimatedButton
-                variant="primary"
-                onClick={handleAnalyze}
-                loading={isAnalyzing}
-                icon={isAnalyzing ? undefined : <Search className="w-4 h-4" />}
-              >
-                {isAnalyzing ? 'Analyzing...' : 'Analyze Case'}
-              </AnimatedButton>
-            </div>
           </div>
+        </motion.div>
+
+        {/* Premium Crime Input */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
+        >
+          <PremiumCrimeInput
+            value={text}
+            onChange={setText}
+            onSubmit={handleAnalyze}
+            isLoading={isAnalyzing}
+          />
         </motion.div>
 
         {/* Results Section */}
