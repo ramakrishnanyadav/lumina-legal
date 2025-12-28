@@ -140,8 +140,8 @@ const PremiumCrimeInput = ({
             transition: 'box-shadow 0.5s ease',
           }}
         >
-          {/* Textarea */}
-          <div className="relative">
+          {/* Textarea with resize handle */}
+          <div className="relative group">
             <textarea
               ref={textareaRef}
               value={value}
@@ -149,9 +149,17 @@ const PremiumCrimeInput = ({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               maxLength={maxLength}
-              className="w-full min-h-[200px] p-6 bg-transparent border-none outline-none resize-none text-foreground text-lg leading-relaxed"
-              style={{ caretColor: 'hsl(187 100% 50%)' }}
+              className="w-full min-h-[200px] p-6 bg-transparent border-none outline-none resize-y text-foreground text-lg leading-relaxed"
+              style={{ caretColor: 'hsl(187 100% 50%)', maxHeight: '500px' }}
+              data-draggable
             />
+            
+            {/* Resize indicator */}
+            <div className="absolute bottom-2 right-2 w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity pointer-events-none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
+                <path d="M22 22L12 22M22 22L22 12M22 22L16 16" />
+              </svg>
+            </div>
 
             {/* Animated placeholder */}
             <AnimatePresence>

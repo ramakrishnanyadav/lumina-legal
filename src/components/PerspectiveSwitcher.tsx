@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { User, Shield, AlertCircle, CheckCircle, Phone, FileText, Scale, Gavel } from 'lucide-react';
 import GlassCard from './GlassCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Particle {
   id: number;
@@ -76,6 +77,7 @@ const itemVariants = {
 const PerspectiveSwitcher = () => {
   const [perspective, setPerspective] = useState<'victim' | 'accused'>('victim');
   const [particles, setParticles] = useState<Particle[]>([]);
+  const isMobile = useIsMobile();
 
   const content = perspective === 'victim' ? victimContent : accusedContent;
   const ContentIcon = content.icon;
@@ -105,6 +107,15 @@ const PerspectiveSwitcher = () => {
     if (newPerspective !== perspective) {
       triggerParticleBurst(e);
       setPerspective(newPerspective);
+    }
+  };
+
+  // Mobile swipe handler
+  const handleSwipeEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x > 100 && perspective === 'accused') {
+      setPerspective('victim');
+    } else if (info.offset.x < -100 && perspective === 'victim') {
+      setPerspective('accused');
     }
   };
 
@@ -256,15 +267,34 @@ const PerspectiveSwitcher = () => {
           </div>
         </motion.div>
 
-        {/* Content Area */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={perspective}
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
+        {/* Content Area - with swipe support on mobile */}
+        <motion.div
+          drag={isMobile ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.3}
+          onDragEnd={handleSwipeEnd}
+          className="touch-pan-y"
+        >
+          {/* Swipe hint on mobile */}
+          {isMobile && (
+            <motion.div
+              className="flex justify-center mb-4 gap-2 text-muted-foreground text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <span>← Swipe to switch →</span>
+            </motion.div>
+          )}
+          
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={perspective}
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
             <div 
               className="relative rounded-3xl overflow-hidden"
               style={{
@@ -376,6 +406,7 @@ const PerspectiveSwitcher = () => {
             </div>
           </motion.div>
         </AnimatePresence>
+      </motion.div>
       </div>
     </section>
   );
