@@ -1,197 +1,94 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Scale, Shield, FileText, Gavel } from 'lucide-react';
+import { Scale, Shield, Gavel, ArrowRight } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
-import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-import TextReveal from './TextReveal';
-import { ParallaxLayer } from './ParallaxSection';
-import MorphingBlob from './MorphingBlob';
-
-const floatingCards = [
-  { icon: Scale, label: 'Criminal Law', color: 'from-primary to-secondary' },
-  { icon: Shield, label: 'Cyber Crime', color: 'from-secondary to-accent' },
-  { icon: FileText, label: 'Property Law', color: 'from-accent to-primary' },
-  { icon: Gavel, label: 'Civil Rights', color: 'from-primary to-purple' },
-];
-
-const springConfig = { damping: 20, stiffness: 300 };
 
 const HeroSection = () => {
   const containerRef = useRef<HTMLElement>(null);
   
-  // Parallax scroll
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start']
   });
 
-  // Four layers with different speeds (10%, 30%, 60%, 100%)
-  const layer1Y = useTransform(scrollYProgress, [0, 1], [0, -50]);   // 10% - Background
-  const layer2Y = useTransform(scrollYProgress, [0, 1], [0, -150]);  // 30% - Mid
-  const layer3Y = useTransform(scrollYProgress, [0, 1], [0, -300]);  // 60% - Foreground
-  const layer4Y = useTransform(scrollYProgress, [0, 1], [0, -500]);  // 100% - Text (normal)
-  
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
 
   return (
     <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-20">
-      {/* Layer 1 - Background (10% parallax) - Morphing blobs */}
-      <motion.div 
-        className="absolute inset-0"
-        style={{ y: layer1Y }}
-      >
-        <MorphingBlob 
-          className="top-1/4 left-1/4" 
-          color="hsl(266 93% 58%)" 
-          size={600}
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: 'radial-gradient(ellipse 80% 50% at 50% 30%, hsl(var(--primary) / 0.15) 0%, transparent 60%)',
+          }}
         />
-        <MorphingBlob 
-          className="bottom-1/4 right-1/4" 
-          color="hsl(187 100% 50%)" 
-          size={500}
-        />
-        <motion.div
+        <div 
           className="absolute inset-0 opacity-30"
           style={{
-            background: 'radial-gradient(circle at 30% 50%, hsl(266 93% 58% / 0.3) 0%, transparent 50%), radial-gradient(circle at 70% 30%, hsl(187 100% 50% / 0.2) 0%, transparent 40%)',
+            background: 'radial-gradient(ellipse 60% 40% at 70% 60%, hsl(var(--secondary) / 0.1) 0%, transparent 50%)',
           }}
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
-      </motion.div>
+      </div>
 
-      {/* Layer 2 - Mid layer (30% parallax) - Decorative shapes */}
+      {/* Main content */}
       <motion.div 
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-        style={{ y: layer2Y, opacity }}
-      >
-        {[...Array(6)].map((_, index) => (
-          <motion.div
-            key={index}
-            className="absolute w-32 h-32 rounded-full opacity-20"
-            style={{
-              background: `linear-gradient(135deg, hsl(${180 + index * 20} 80% 50%), transparent)`,
-              top: `${Math.random() * 80}%`,
-              left: `${Math.random() * 80}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              rotate: [0, 180, 360],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 10 + index * 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: index * 0.5,
-            }}
-          />
-        ))}
-      </motion.div>
-
-      {/* Layer 3 - Foreground (60% parallax) - Floating cards */}
-      <motion.div 
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-        style={{ y: layer3Y, opacity }}
-      >
-        {floatingCards.map((card, index) => (
-          <motion.div
-            key={card.label}
-            className="absolute glass rounded-xl p-4"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{
-              opacity: 0.6,
-              scale: 1,
-              y: [0, -20, 0],
-              x: [0, 10, 0],
-              rotate: [0, 5, 0],
-            }}
-            transition={{
-              type: 'spring',
-              ...springConfig,
-              delay: index * 0.2,
-              y: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
-              x: { duration: 8, repeat: Infinity, ease: 'easeInOut', delay: index * 0.3 },
-              rotate: { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: index * 0.4 },
-            }}
-            style={{
-              top: `${20 + index * 15}%`,
-              left: index % 2 === 0 ? '5%' : 'auto',
-              right: index % 2 === 1 ? '5%' : 'auto',
-            }}
-          >
-            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-              <card.icon className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">{card.label}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Layer 4 - Text content (100% - normal scroll) */}
-      <motion.div 
-        className="relative z-10 text-center max-w-5xl mx-auto"
-        style={{ y: layer4Y, opacity, scale }}
+        className="relative z-10 text-center max-w-4xl mx-auto"
+        style={{ y, opacity, scale }}
       >
         {/* Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: 'spring', ...springConfig }}
-          className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+          className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-8 bg-primary/10 border border-primary/20"
         >
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-sm text-muted-foreground">AI-Powered Legal Analysis</span>
         </motion.div>
 
-        {/* Animated heading with split text */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-          <TextReveal 
-            text="Understand Your Legal Position" 
-            type="letter"
-            stagger={0.03}
-            className="inline"
-          />
-        </h1>
+        {/* Clean heading - no animation artifacts */}
+        <motion.h1 
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.1 }}
+        >
+          <span className="block">Understand Your</span>
+          <span className="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+            Legal Position
+          </span>
+        </motion.h1>
 
-        {/* Glowing underline */}
+        {/* Accent line */}
         <motion.div
-          className="h-1 mx-auto rounded-full"
+          className="h-1 mx-auto rounded-full max-w-xs"
           style={{
-            background: 'linear-gradient(90deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%))',
-            boxShadow: '0 0 20px hsl(187 100% 50% / 0.5)',
+            background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--primary)))',
           }}
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: '60%', opacity: 1 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 100, delay: 1.5 }}
+          animate={{ width: '100%', opacity: 1 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.5 }}
         />
 
-        {/* Subtitle with word reveal */}
-        <motion.div
-          className="mt-8"
+        {/* Subtitle */}
+        <motion.p
+          className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', ...springConfig, delay: 1.8 }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.7 }}
         >
-          <TextReveal
-            text="AI-powered legal information based on Indian criminal law. Receive preliminary analysis of applicable statutes and procedural guidance."
-            type="word"
-            stagger={0.03}
-            delay={2}
-            className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"
-          />
-        </motion.div>
+          AI-powered legal information based on Indian criminal law. Receive preliminary analysis of applicable statutes and procedural guidance.
+        </motion.p>
 
         {/* CTA Buttons */}
         <motion.div
-          className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', ...springConfig, delay: 2.5 }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.9 }}
         >
           <AnimatedButton
             variant="primary"
@@ -207,42 +104,29 @@ const HeroSection = () => {
           </AnimatedButton>
         </motion.div>
 
-        {/* Trust indicators with number counters */}
+        {/* Trust indicators */}
         <motion.div
-          className="mt-16 flex flex-wrap items-center justify-center gap-8 text-muted-foreground"
+          className="mt-16 flex flex-wrap items-center justify-center gap-6 md:gap-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ type: 'spring', ...springConfig, delay: 2.8 }}
+          transition={{ duration: 0.6, delay: 1.1 }}
         >
-          <motion.div 
-            className="flex items-center gap-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: 'spring', ...springConfig, delay: 2.9 }}
-          >
-            <Shield className="w-5 h-5 text-primary" />
-            <span className="text-sm">Secure & Confidential</span>
-          </motion.div>
-          
-          <motion.div 
-            className="flex items-center gap-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: 'spring', ...springConfig, delay: 3.0 }}
-          >
-            <Scale className="w-5 h-5 text-secondary" />
-            <span className="text-sm">Based on IPC & CrPC Database</span>
-          </motion.div>
-          
-          <motion.div 
-            className="flex items-center gap-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: 'spring', ...springConfig, delay: 3.1 }}
-          >
-            <Gavel className="w-5 h-5 text-accent" />
-            <span className="text-sm">Advocate-Reviewed Framework</span>
-          </motion.div>
+          {[
+            { icon: Shield, text: 'Secure & Confidential', color: 'text-primary' },
+            { icon: Scale, text: 'Based on IPC & CrPC', color: 'text-secondary' },
+            { icon: Gavel, text: 'Advocate-Reviewed', color: 'text-primary' },
+          ].map((item, index) => (
+            <motion.div 
+              key={item.text}
+              className="flex items-center gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 1.2 + index * 0.1 }}
+            >
+              <item.icon className={`w-4 h-4 ${item.color}`} />
+              <span className="text-sm text-muted-foreground">{item.text}</span>
+            </motion.div>
+          ))}
         </motion.div>
       </motion.div>
     </section>
