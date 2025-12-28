@@ -93,7 +93,7 @@ const CustomCursor = () => {
       {/* Subtle trailing dots - max 3, small size */}
       {trails.map((trail, index) => (
         <motion.div
-          key={trail.id}
+          key={`trail-${trail.id}-${index}`}
           className="fixed pointer-events-none z-[9998]"
           initial={{ opacity: 0.2, scale: 1 }}
           animate={{ opacity: 0, scale: 0.5 }}
