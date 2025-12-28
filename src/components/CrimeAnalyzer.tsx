@@ -3,6 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Check, AlertTriangle, Scale, Clock, FileText } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
 import GlassCard from './GlassCard';
+import FloatingInput from './FloatingInput';
+import AnimatedCheckbox from './AnimatedCheckbox';
+import AnimatedToggle from './AnimatedToggle';
+import AnimatedDropdown from './AnimatedDropdown';
+import { showToast } from './AnimatedToast';
 
 const mockResults = {
   sections: [
@@ -37,11 +42,22 @@ const itemVariants = {
   },
 };
 
+const caseTypes = [
+  { value: 'criminal', label: 'Criminal Case' },
+  { value: 'civil', label: 'Civil Case' },
+  { value: 'family', label: 'Family Dispute' },
+  { value: 'property', label: 'Property Matter' },
+  { value: 'cyber', label: 'Cyber Crime' },
+];
+
 const CrimeAnalyzer = () => {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<typeof mockResults | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [caseType, setCaseType] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [needsLawyer, setNeedsLawyer] = useState(false);
 
   const handleAnalyze = async () => {
     if (!text.trim()) return;
@@ -54,6 +70,9 @@ const CrimeAnalyzer = () => {
     
     setIsAnalyzing(false);
     setResults(mockResults);
+    
+    // Show success toast with confetti
+    showToast('success', 'Analysis Complete!', 'We found 3 applicable legal sections for your case.');
   };
 
   const getConfidenceColor = (confidence: number) => {
@@ -99,6 +118,28 @@ const CrimeAnalyzer = () => {
           />
 
           <div className="relative glass rounded-2xl p-6">
+            {/* Case type dropdown and options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <AnimatedDropdown
+                options={caseTypes}
+                value={caseType}
+                onChange={setCaseType}
+                placeholder="Select case type"
+              />
+              <div className="flex items-center gap-6">
+                <AnimatedToggle
+                  checked={isUrgent}
+                  onChange={setIsUrgent}
+                  label="Urgent"
+                />
+                <AnimatedCheckbox
+                  checked={needsLawyer}
+                  onChange={setNeedsLawyer}
+                  label="Need lawyer"
+                />
+              </div>
+            </div>
+
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
