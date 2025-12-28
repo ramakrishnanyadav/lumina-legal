@@ -39,20 +39,21 @@ export const DetailLevelToggle = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 px-4 py-2 rounded-xl glass"
+      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+      className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10"
     >
       <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">Detail Level:</span>
+      <span className="text-sm text-muted-foreground">Detail:</span>
       
       <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5">
         <motion.button
           onClick={() => setDetailLevel('simple')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 min-h-[32px] ${
             detailLevel === 'simple' 
               ? 'bg-primary/20 text-primary' 
-              : 'text-muted-foreground hover:text-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
           }`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -63,10 +64,10 @@ export const DetailLevelToggle = () => {
         
         <motion.button
           onClick={() => setDetailLevel('detailed')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 min-h-[32px] ${
             detailLevel === 'detailed' 
               ? 'bg-primary/20 text-primary' 
-              : 'text-muted-foreground hover:text-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
           }`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

@@ -79,28 +79,28 @@ const AnimatedDropdown = ({
     <div ref={dropdownRef} className={`relative ${className}`}>
       <motion.button
         type="button"
-        className="w-full px-4 py-3 rounded-xl flex items-center justify-between gap-2 text-left"
+        className="w-full px-4 py-3 rounded-xl flex items-center justify-between gap-3 text-left min-h-[48px] transition-all duration-200"
         style={{
           background: 'rgba(255, 255, 255, 0.05)',
-          border: `1px solid ${isOpen ? 'hsl(187 100% 50%)' : 'rgba(255, 255, 255, 0.1)'}`,
+          border: `1px solid ${isOpen ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0.1)'}`,
           boxShadow: isOpen 
-            ? '0 0 20px rgba(0, 217, 255, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.2)' 
-            : 'inset 0 1px 2px rgba(0, 0, 0, 0.2)',
+            ? '0 0 16px rgba(0, 217, 255, 0.15)' 
+            : 'none',
         }}
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', ...springConfig }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
       >
-        <span className={selectedOption ? 'text-foreground' : 'text-muted-foreground'}>
+        <span className={`text-sm font-medium ${selectedOption ? 'text-foreground' : 'text-muted-foreground'}`}>
           {selectedOption?.icon && <span className="mr-2">{selectedOption.icon}</span>}
           {selectedOption?.label || placeholder}
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ type: 'spring', ...springConfig }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
-          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </motion.div>
       </motion.button>
 
@@ -109,43 +109,42 @@ const AnimatedDropdown = ({
           <motion.div
             className="absolute top-full left-0 right-0 mt-2 rounded-xl overflow-hidden z-50"
             style={{
-              background: 'rgba(10, 14, 39, 0.95)',
+              background: 'hsl(var(--card))',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             }}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
           >
-            {options.map((option, index) => (
+            {options.map((option) => (
               <motion.button
                 key={option.value}
                 type="button"
-                className="w-full px-4 py-3 flex items-center gap-2 text-left transition-colors"
+                className="w-full px-4 py-3 flex items-center gap-3 text-left transition-colors min-h-[44px]"
                 style={{
-                  background: value === option.value ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
+                  background: value === option.value ? 'hsl(var(--primary) / 0.1)' : 'transparent',
                 }}
                 variants={itemVariants}
                 onClick={() => handleSelect(option.value)}
                 whileHover={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  x: 4,
                 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', ...springConfig }}
+                whileTap={{ scale: 0.99 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
               >
                 {option.icon && <span>{option.icon}</span>}
-                <span className={value === option.value ? 'text-primary' : 'text-foreground'}>
+                <span className={`text-sm ${value === option.value ? 'text-primary font-medium' : 'text-foreground'}`}>
                   {option.label}
                 </span>
                 {value === option.value && (
                   <motion.div
-                    className="ml-auto w-2 h-2 rounded-full bg-primary"
+                    className="ml-auto w-1.5 h-1.5 rounded-full bg-primary"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: 'spring', ...springConfig }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   />
                 )}
               </motion.button>

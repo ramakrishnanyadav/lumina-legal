@@ -123,79 +123,64 @@ const CrimeAnalyzerContent = () => {
   };
 
   return (
-    <section id="analyzer" className="relative py-24 px-4">
-      <div className="max-w-4xl mx-auto">
+    <section id="analyzer" className="relative py-16 md:py-24 px-4">
+      <div className="max-w-5xl mx-auto">
+        {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ type: 'spring', ...springConfig }}
-          className="text-center mb-12"
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          className="text-center mb-8 md:mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
             <span className="gradient-text">Situation Assessment</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Describe the circumstances for preliminary statutory analysis
           </p>
         </motion.div>
 
-        {/* Detail Level Toggle */}
+        {/* Main Card Container */}
         <motion.div
-          className="flex justify-center mb-6"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          <DetailLevelToggle />
-        </motion.div>
-
-        {/* Options Row */}
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ type: 'spring', ...springConfig, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+          className="glass rounded-2xl p-6 md:p-8 space-y-6"
         >
-          <div 
-            className="rounded-xl p-4"
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          {/* Options Bar - Compact horizontal layout */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pb-6 border-b border-white/10">
+            {/* Case Type Dropdown */}
+            <div className="flex-1 min-w-[200px]">
               <AnimatedDropdown
                 options={caseTypes}
                 value={caseType}
                 onChange={setCaseType}
                 placeholder="Select case type"
               />
-              <div className="flex items-center justify-center">
-                <UrgencyIndicator
-                  isUrgent={isUrgent}
-                  onToggle={setIsUrgent}
-                />
-              </div>
-              <div className="flex items-center justify-center md:justify-end">
-                <AnimatedCheckbox
-                  checked={needsLawyer}
-                  onChange={setNeedsLawyer}
-                  label="Connect with advocate"
-                />
-              </div>
             </div>
+            
+            {/* Urgency Toggle */}
+            <UrgencyIndicator
+              isUrgent={isUrgent}
+              onToggle={setIsUrgent}
+            />
+            
+            {/* Advocate Checkbox */}
+            <AnimatedCheckbox
+              checked={needsLawyer}
+              onChange={setNeedsLawyer}
+              label="Connect with advocate"
+            />
           </div>
-        </motion.div>
 
-        {/* Premium Crime Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
-        >
+          {/* Detail Level Toggle - centered */}
+          <div className="flex justify-center">
+            <DetailLevelToggle />
+          </div>
+
+          {/* Premium Crime Input */}
           <PremiumCrimeInput
             value={text}
             onChange={setText}
