@@ -13,8 +13,10 @@ import CustomCursor from '@/components/CustomCursor';
 import { ScrollSpotlight } from '@/components/ParallaxSection';
 import ScrollReveal from '@/components/ScrollReveal';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-const Index = () => {
+import MobileNavigation from '@/components/MobileNavigation';
+import Floating3DObjects from '@/components/Floating3DObjects';
+import { ToastProvider } from '@/components/PremiumToast';
+import { PerformanceProvider } from '@/components/MobileOptimizations';
   const isMobile = useIsMobile();
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
