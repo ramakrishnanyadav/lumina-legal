@@ -65,13 +65,13 @@ const Navbar = () => {
           <motion.a
             href="/"
             className="flex items-center gap-2"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', ...springConfig }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/25">
-              <Scale className="w-5 h-5 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <Scale className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">
+            <span className="text-base font-semibold tracking-tight">
               Legal<span className="text-primary">AI</span>
             </span>
           </motion.a>
