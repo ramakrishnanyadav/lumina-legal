@@ -15,6 +15,8 @@ import { LazyLoader, SectionSkeleton, Deferred, Progressive } from '@/components
 import { AccessibilityProvider } from '@/components/AccessibilityProvider';
 import { SkipToContent } from '@/components/AccessibilityComponents';
 import AccessibilityPanel from '@/components/AccessibilityPanel';
+import { DisclaimerBadge } from '@/components/DisclaimerSystem';
+import SourcesFooter from '@/components/SourcesFooter';
 
 // Lazy load heavy components
 const ParticleBackground = lazy(() => import('@/components/ParticleBackground'));
@@ -135,10 +137,15 @@ const Index = () => {
                 </section>
               </main>
               
+              {/* Sources Footer */}
+              <SourcesFooter />
+              
               {/* Footer */}
               <Footer />
               
-              {/* Floating Elements - deferred */}
+              {/* Floating Elements */}
+              <DisclaimerBadge />
+              
               <Deferred delay={1000}>
                 <LazyLoader>
                   <FloatingAIChat />
