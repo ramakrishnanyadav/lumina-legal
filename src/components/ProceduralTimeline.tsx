@@ -39,6 +39,8 @@ const timelineSteps = [
   },
 ];
 
+const springConfig = { damping: 20, stiffness: 300 };
+
 const ProceduralTimeline = () => {
   return (
     <section className="py-24 px-4 overflow-hidden">
@@ -47,7 +49,7 @@ const ProceduralTimeline = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ type: 'spring', ...springConfig }}
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -65,7 +67,7 @@ const ProceduralTimeline = () => {
             initial={{ scaleY: 0 }}
             whileInView={{ scaleY: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 50 }}
             style={{ originY: 0 }}
           />
 
@@ -83,32 +85,52 @@ const ProceduralTimeline = () => {
                 initial={{ opacity: 0, x: isEven ? -50 : 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ type: 'spring', ...springConfig, delay: index * 0.1 }}
               >
                 {/* Content */}
                 <div className={`ml-20 md:ml-0 md:w-1/2 ${isEven ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
                   <motion.div
                     className="glass rounded-2xl p-6 inline-block"
                     whileHover={{ scale: 1.02, y: -5 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
+                    transition={{ type: 'spring', ...springConfig }}
                   >
                     <div className={`flex items-center gap-3 mb-3 ${isEven ? 'md:justify-end' : ''}`}>
-                      <h3 className="text-xl font-bold">{step.title}</h3>
+                      <motion.h3 
+                        className="text-xl font-bold"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ type: 'spring', ...springConfig, delay: index * 0.1 + 0.2 }}
+                      >
+                        {step.title}
+                      </motion.h3>
                       {isCompleted && (
                         <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
+                          initial={{ scale: 0, rotate: -180 }}
+                          whileInView={{ scale: 1, rotate: 0 }}
+                          transition={{ type: 'spring', ...springConfig, delay: index * 0.1 + 0.3 }}
                           className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center"
                         >
                           <CheckCircle className="w-4 h-4 text-green-400" />
                         </motion.div>
                       )}
                     </div>
-                    <p className="text-muted-foreground mb-4">{step.description}</p>
-                    <div className={`flex items-center gap-2 text-sm ${isEven ? 'md:justify-end' : ''}`}>
+                    <motion.p 
+                      className="text-muted-foreground mb-4"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ type: 'spring', ...springConfig, delay: index * 0.1 + 0.3 }}
+                    >
+                      {step.description}
+                    </motion.p>
+                    <motion.div 
+                      className={`flex items-center gap-2 text-sm ${isEven ? 'md:justify-end' : ''}`}
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ type: 'spring', ...springConfig, delay: index * 0.1 + 0.4 }}
+                    >
                       <Clock className="w-4 h-4 text-primary" />
                       <span className="text-primary font-medium">{step.duration}</span>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </div>
 
@@ -116,19 +138,30 @@ const ProceduralTimeline = () => {
                 <motion.div
                   className="absolute left-4 md:left-1/2 md:-translate-x-1/2 z-10"
                   whileHover={{ scale: 1.2, rotate: 360 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ type: 'spring', ...springConfig }}
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
                 >
-                  <div
+                  <motion.div
                     className={`w-12 h-12 rounded-full flex items-center justify-center ${
                       isCompleted
                         ? 'bg-green-500'
                         : isCurrent
-                        ? 'bg-gradient-to-br from-primary to-secondary animate-pulse-glow'
+                        ? 'bg-gradient-to-br from-primary to-secondary'
                         : 'glass'
                     }`}
+                    animate={isCurrent ? {
+                      boxShadow: [
+                        '0 0 20px hsl(187 100% 50% / 0.3)',
+                        '0 0 40px hsl(187 100% 50% / 0.6)',
+                        '0 0 20px hsl(187 100% 50% / 0.3)',
+                      ],
+                    } : undefined}
+                    transition={{ duration: 2, repeat: Infinity }}
                   >
                     <step.icon className={`w-5 h-5 ${isCompleted || isCurrent ? 'text-white' : 'text-muted-foreground'}`} />
-                  </div>
+                  </motion.div>
                 </motion.div>
 
                 {/* Empty space for layout */}
@@ -144,11 +177,12 @@ const ProceduralTimeline = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ type: 'spring', ...springConfig, delay: 0.5 }}
         >
           <motion.button
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
             whileHover={{ x: 5 }}
+            transition={{ type: 'spring', ...springConfig }}
           >
             View Detailed Process Guide
             <ArrowRight className="w-4 h-4" />

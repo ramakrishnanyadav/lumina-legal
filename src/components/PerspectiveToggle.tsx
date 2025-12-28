@@ -27,6 +27,28 @@ const accusedContent = {
   ],
 };
 
+const springConfig = { damping: 20, stiffness: 300 };
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { type: 'spring', ...springConfig },
+  },
+};
+
 const PerspectiveToggle = () => {
   const [perspective, setPerspective] = useState<'victim' | 'accused'>('victim');
 
@@ -39,7 +61,7 @@ const PerspectiveToggle = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ type: 'spring', ...springConfig }}
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -56,7 +78,7 @@ const PerspectiveToggle = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ type: 'spring', ...springConfig, delay: 0.2 }}
         >
           <div className="relative glass rounded-full p-1 flex">
             {/* Sliding indicator */}
@@ -67,7 +89,7 @@ const PerspectiveToggle = () => {
                 left: perspective === 'victim' ? '4px' : '50%',
                 width: 'calc(50% - 4px)',
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'spring', ...springConfig }}
               style={{
                 background: perspective === 'victim'
                   ? 'linear-gradient(135deg, #f97316, #ef4444)'
@@ -75,29 +97,35 @@ const PerspectiveToggle = () => {
               }}
             />
 
-            <button
+            <motion.button
               onClick={() => setPerspective('victim')}
               className={`relative z-10 px-8 py-3 rounded-full font-semibold transition-colors duration-300 ${
                 perspective === 'victim' ? 'text-white' : 'text-muted-foreground'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', ...springConfig }}
             >
               <span className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 Victim
               </span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={() => setPerspective('accused')}
               className={`relative z-10 px-8 py-3 rounded-full font-semibold transition-colors duration-300 ${
                 perspective === 'accused' ? 'text-white' : 'text-muted-foreground'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', ...springConfig }}
             >
               <span className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Accused
               </span>
-            </button>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -108,7 +136,7 @@ const PerspectiveToggle = () => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ type: 'spring', ...springConfig }}
           >
             <div className="relative">
               {/* Background gradient */}
@@ -121,6 +149,9 @@ const PerspectiveToggle = () => {
                       : 'hsl(210 100% 60%), hsl(266 93% 58%)'
                   })`,
                 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.2 }}
+                transition={{ type: 'spring', ...springConfig }}
               />
 
               <div className="relative glass rounded-3xl p-8">
@@ -129,26 +160,34 @@ const PerspectiveToggle = () => {
                     className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${content.color} flex items-center justify-center`}
                     initial={{ rotate: -10, scale: 0 }}
                     animate={{ rotate: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
+                    transition={{ type: 'spring', ...springConfig }}
                   >
                     <content.icon className="w-7 h-7 text-white" />
                   </motion.div>
-                  <h3 className="text-2xl font-bold">{content.title}</h3>
+                  <motion.h3 
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ type: 'spring', ...springConfig, delay: 0.1 }}
+                  >
+                    {content.title}
+                  </motion.h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   {content.steps.map((step, index) => (
-                    <motion.div
-                      key={step.title}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + index * 0.1 }}
-                    >
-                      <GlassCard hover={false}>
+                    <motion.div key={step.title} variants={itemVariants}>
+                      <GlassCard hover={false} index={index}>
                         <div className="flex items-start gap-4">
                           <motion.div
                             className={`w-10 h-10 rounded-lg bg-gradient-to-br ${content.color} flex items-center justify-center flex-shrink-0`}
                             whileHover={{ scale: 1.1, rotate: 5 }}
+                            transition={{ type: 'spring', ...springConfig }}
                           >
                             <step.icon className="w-5 h-5 text-white" />
                           </motion.div>
@@ -162,7 +201,7 @@ const PerspectiveToggle = () => {
                       </GlassCard>
                     </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </div>
             </div>
           </motion.div>
