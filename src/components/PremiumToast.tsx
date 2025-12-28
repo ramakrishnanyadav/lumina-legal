@@ -1,7 +1,6 @@
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { Check, X, AlertTriangle, Info, ChevronRight } from 'lucide-react';
-import Confetti from './Confetti';
+import { Check, X, AlertTriangle, Info } from 'lucide-react';
 
 // Toast types
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -22,6 +21,9 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
+
 export const useToasts = () => {
   const context = useContext(ToastContext);
   if (!context) throw new Error('useToasts must be used within ToastProvider');
@@ -39,17 +41,11 @@ const ToastItem = ({
   index: number;
 }) => {
   const [progress, setProgress] = useState(100);
-  const [showConfetti, setShowConfetti] = useState(false);
   const x = useMotionValue(0);
   const opacity = useTransform(x, [-100, 0, 100], [0, 1, 0]);
-  const duration = toast.duration || 5000;
+  const duration = toast.duration || 4000;
 
   useEffect(() => {
-    if (toast.type === 'success') {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
-    }
-
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -62,7 +58,7 @@ const ToastItem = ({
     }, 50);
 
     return () => clearInterval(interval);
-  }, [duration, onRemove, toast.type]);
+  }, [duration, onRemove]);
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (Math.abs(info.velocity.x) > 200 || Math.abs(info.offset.x) > 100) {
@@ -78,17 +74,24 @@ const ToastItem = ({
   };
 
   const colors = {
-    success: 'border-l-green-500 bg-green-500/10',
-    error: 'border-l-red-500 bg-red-500/10',
-    warning: 'border-l-yellow-500 bg-yellow-500/10',
-    info: 'border-l-primary bg-primary/10',
+    success: 'border-l-green-500',
+    error: 'border-l-red-500',
+    warning: 'border-l-yellow-500',
+    info: 'border-l-primary',
   };
 
   const iconColors = {
-    success: 'text-green-500',
-    error: 'text-red-500',
-    warning: 'text-yellow-500',
-    info: 'text-primary',
+    success: 'text-green-500 bg-green-500/10',
+    error: 'text-red-500 bg-red-500/10',
+    warning: 'text-yellow-500 bg-yellow-500/10',
+    info: 'text-primary bg-primary/10',
+  };
+
+  const progressColors = {
+    success: 'bg-green-500',
+    error: 'bg-red-500',
+    warning: 'bg-yellow-500',
+    info: 'bg-primary',
   };
 
   const Icon = icons[toast.type];
@@ -96,78 +99,30 @@ const ToastItem = ({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 300, scale: 0.8 }}
+      initial={{ opacity: 0, x: 100 }}
       animate={{ 
         opacity: 1, 
-        x: 0, 
-        scale: 1,
-        y: index * 10,
+        x: 0,
+        y: index * 4, // Stack with 4px offset
       }}
       exit={{ 
         opacity: 0, 
-        x: 300, 
-        scale: 0.8,
-        transition: { duration: 0.2 }
+        x: 100,
+        transition: { duration: 0.2, ease: easeOut }
       }}
-      transition={{
-        type: 'spring',
-        damping: 20,
-        stiffness: 300,
-      }}
+      transition={{ duration: 0.25, ease: easeOut }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       style={{ x, opacity }}
-      className={`relative w-80 glass rounded-xl border-l-4 ${colors[toast.type]} overflow-hidden cursor-grab active:cursor-grabbing`}
+      className={`relative w-80 glass rounded-lg border-l-4 ${colors[toast.type]} overflow-hidden cursor-grab active:cursor-grabbing`}
     >
-      {/* Confetti for success */}
-      {showConfetti && toast.type === 'success' && (
-        <div className="absolute inset-0 pointer-events-none">
-          <Confetti active={showConfetti} particleCount={30} />
-        </div>
-      )}
-
       {/* Content */}
       <div className="p-4 flex items-start gap-3">
-        {/* Animated icon */}
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            type: 'spring', 
-            damping: 15, 
-            stiffness: 300,
-            delay: 0.1 
-          }}
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${toast.type === 'success' ? 'bg-green-500/20' : toast.type === 'error' ? 'bg-red-500/20' : toast.type === 'warning' ? 'bg-yellow-500/20' : 'bg-primary/20'}`}
-        >
-          {toast.type === 'success' ? (
-            <motion.svg
-              viewBox="0 0 24 24"
-              className={`w-5 h-5 ${iconColors[toast.type]}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <motion.path
-                d="M5 13l4 4L19 7"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-              />
-            </motion.svg>
-          ) : toast.type === 'error' ? (
-            <motion.div
-              initial={{ rotate: 45, scale: 0 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: 'spring', damping: 15 }}
-            >
-              <X className={`w-5 h-5 ${iconColors[toast.type]}`} />
-            </motion.div>
-          ) : (
-            <Icon className={`w-5 h-5 ${iconColors[toast.type]}`} />
-          )}
-        </motion.div>
+        {/* Icon */}
+        <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${iconColors[toast.type]}`}>
+          <Icon className="w-4 h-4" />
+        </div>
 
         {/* Text */}
         <div className="flex-1 min-w-0">
@@ -177,43 +132,22 @@ const ToastItem = ({
           )}
         </div>
 
-        {/* Swipe indicator */}
-        <motion.div
-          animate={{ x: [0, 5, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="text-muted-foreground/50"
+        {/* Close button */}
+        <motion.button
+          className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
+          onClick={onRemove}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight className="w-4 h-4" />
-        </motion.div>
+          <X className="w-4 h-4 text-muted-foreground" />
+        </motion.button>
       </div>
 
       {/* Progress bar */}
-      <motion.div
-        className={`h-1 ${toast.type === 'success' ? 'bg-green-500' : toast.type === 'error' ? 'bg-red-500' : toast.type === 'warning' ? 'bg-yellow-500' : 'bg-primary'}`}
-        initial={{ width: '100%' }}
-        style={{ width: `${progress}%` }}
-        transition={{ duration: 0.05 }}
+      <div
+        className={`h-0.5 ${progressColors[toast.type]}`}
+        style={{ width: `${progress}%`, transition: 'width 50ms linear' }}
       />
-
-      {/* Error shake animation */}
-      {toast.type === 'error' && (
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          animate={{ 
-            x: [0, -5, 5, -5, 5, 0],
-          }}
-          transition={{ duration: 0.4 }}
-        />
-      )}
-
-      {/* Warning pulse */}
-      {toast.type === 'warning' && (
-        <motion.div
-          className="absolute inset-0 bg-yellow-500/10 pointer-events-none"
-          animate={{ opacity: [0, 0.3, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        />
-      )}
     </motion.div>
   );
 };
@@ -236,7 +170,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       {children}
       
       {/* Toast container */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-3">
+      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
         <AnimatePresence mode="popLayout">
           {toasts.map((toast, index) => (
             <ToastItem

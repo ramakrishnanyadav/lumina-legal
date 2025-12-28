@@ -11,9 +11,12 @@ interface NumberCounterProps {
   decimals?: number;
 }
 
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
+
 const NumberCounter = ({
   value,
-  duration = 2,
+  duration = 1.5, // Slightly faster for professionalism
   delay = 0,
   prefix = '',
   suffix = '',
@@ -21,12 +24,12 @@ const NumberCounter = ({
   decimals = 0,
 }: NumberCounterProps) => {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   
+  // Use duration-based easing for natural feel
   const springValue = useSpring(0, {
-    damping: 30,
-    stiffness: 100,
-    duration: duration * 1000,
+    damping: 40,
+    stiffness: 80,
   });
 
   const displayValue = useTransform(springValue, (latest) => {

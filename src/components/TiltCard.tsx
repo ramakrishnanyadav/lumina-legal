@@ -9,12 +9,15 @@ interface TiltCardProps {
   parallaxElements?: boolean;
 }
 
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
+
 const TiltCard = ({
   children,
   className = '',
-  maxTilt = 15,
+  maxTilt = 3, // Reduced from 15 to 2-3 degrees max
   glare = true,
-  parallaxElements = true,
+  parallaxElements = false,
 }: TiltCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -22,7 +25,8 @@ const TiltCard = ({
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
   
-  const springConfig = { damping: 20, stiffness: 150 };
+  // Smoother spring config
+  const springConfig = { damping: 30, stiffness: 100 };
   const smoothMouseX = useSpring(mouseX, springConfig);
   const smoothMouseY = useSpring(mouseY, springConfig);
   
@@ -62,34 +66,34 @@ const TiltCard = ({
         transformStyle: 'preserve-3d',
         perspective: 1000,
       }}
-      whileHover={{ scale: 1.02 }}
-      transition={{ scale: { duration: 0.2 } }}
+      transition={{ duration: 0.3, ease: easeOut }}
       data-interactive
     >
-      {/* Glare effect */}
+      {/* Subtle glare effect */}
       {glare && (
         <motion.div
           className="absolute inset-0 pointer-events-none rounded-xl overflow-hidden z-10"
           style={{
-            opacity: isHovered ? 0.15 : 0,
-            background: `radial-gradient(circle at ${glareX.get()}% ${glareY.get()}%, white, transparent 50%)`,
+            opacity: isHovered ? 0.08 : 0,
+            background: `radial-gradient(circle at ${glareX.get()}% ${glareY.get()}%, white, transparent 60%)`,
           }}
           animate={{
-            background: isHovered 
-              ? `radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), white, transparent 50%)`
-              : 'none'
+            opacity: isHovered ? 0.08 : 0,
           }}
+          transition={{ duration: 0.3 }}
         />
       )}
       
-      {/* Parallax wrapper for children */}
+      {/* Content with subtle parallax */}
       {parallaxElements ? (
         <motion.div
           style={{
             transformStyle: 'preserve-3d',
-            transform: isHovered ? 'translateZ(20px)' : 'translateZ(0px)',
           }}
-          transition={{ duration: 0.2 }}
+          animate={{
+            z: isHovered ? 8 : 0,
+          }}
+          transition={{ duration: 0.3, ease: easeOut }}
         >
           {children}
         </motion.div>

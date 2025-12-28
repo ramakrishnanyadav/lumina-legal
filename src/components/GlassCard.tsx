@@ -11,7 +11,8 @@ interface GlassCardProps {
   variant?: 'default' | 'dark' | 'strong';
 }
 
-const springConfig = { damping: 20, stiffness: 300 };
+// Professional ease-out timing
+const easeOut = [0.25, 0.46, 0.45, 0.94];
 
 const GlassCard = ({
   children,
@@ -22,8 +23,8 @@ const GlassCard = ({
   index = 0,
   variant = 'default',
 }: GlassCardProps) => {
-  // Calculate stagger delay based on index
-  const staggerDelay = delay + index * 0.1;
+  // Calculate stagger delay based on index (50ms between elements)
+  const staggerDelay = delay + index * 0.05;
 
   const variantClasses = {
     default: 'glass',
@@ -34,47 +35,33 @@ const GlassCard = ({
   return (
     <motion.div
       className={`relative group ${className}`}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ 
-        type: 'spring',
-        ...springConfig,
+        duration: 0.4,
         delay: staggerDelay,
+        ease: easeOut,
       }}
       whileHover={hover ? { 
-        y: -8, 
-        scale: 1.02,
-        transition: { type: 'spring', ...springConfig }
+        y: -4, 
+        transition: { duration: 0.3, ease: easeOut }
       } : undefined}
     >
       {gradient && (
         <motion.div
           className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100"
-          style={{ background: 'linear-gradient(135deg, hsl(187 100% 50%), hsl(266 93% 58%), hsl(336 100% 50%))' }}
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          transition={{ type: 'spring', ...springConfig }}
+          style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))' }}
+          transition={{ duration: 0.3, ease: easeOut }}
         />
       )}
       
-      <div className={`relative ${variantClasses[variant]} rounded-2xl p-6 h-full overflow-hidden`}>
-        {/* Inner glow effect on hover */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
+      <div className={`relative ${variantClasses[variant]} rounded-2xl p-6 h-full overflow-hidden transition-shadow duration-300 group-hover:shadow-lg group-hover:shadow-primary/5`}>
+        {/* Subtle inner glow on hover */}
+        <div
+          className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
-            background: 'radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1) 0%, transparent 50%)',
-          }}
-        />
-        
-        {/* Subtle gradient overlay on hover */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, transparent 50%, rgba(123, 47, 247, 0.05) 100%)',
+            background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
           }}
         />
         
