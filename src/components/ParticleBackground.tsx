@@ -21,7 +21,8 @@ const ParticleBackground = () => {
 
     let animationId: number;
     let particles: Particle[] = [];
-    const particleCount = 50;
+    // Reduced particle count for subtlety
+    const particleCount = 25;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -34,10 +35,13 @@ const ParticleBackground = () => {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: (Math.random() - 0.5) * 0.5,
-          size: Math.random() * 2 + 1,
-          opacity: Math.random() * 0.5 + 0.1,
+          // Slower movement for professional feel
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15,
+          // Smaller, more subtle particles
+          size: Math.random() * 1.5 + 0.5,
+          // Much lower opacity
+          opacity: Math.random() * 0.15 + 0.05,
         });
       }
     };
