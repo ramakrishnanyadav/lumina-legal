@@ -4,9 +4,9 @@ import { useState, useRef, useCallback } from 'react';
 import AnimatedButton from './AnimatedButton';
 
 const navLinks = [
-  { label: 'Analyzer', href: '#analyzer' },
-  { label: 'How It Works', href: '#timeline' },
-  { label: 'Find Lawyer', href: '#lawyers' },
+  { label: 'Situation Assessment', href: '#analyzer' },
+  { label: 'Procedural Steps', href: '#timeline' },
+  { label: 'Legal Assistance', href: '#lawyers' },
   { label: 'Resources', href: '#resources' },
 ];
 
@@ -103,7 +103,7 @@ const Navbar = () => {
               Sign In
             </AnimatedButton>
             <AnimatedButton variant="primary" size="sm">
-              Get Started
+              Begin Analysis
             </AnimatedButton>
           </div>
 
@@ -151,7 +151,7 @@ const Navbar = () => {
                 Sign In
               </AnimatedButton>
               <AnimatedButton variant="primary" size="sm" className="w-full">
-                Get Started
+                Begin Analysis
               </AnimatedButton>
             </div>
           </div>

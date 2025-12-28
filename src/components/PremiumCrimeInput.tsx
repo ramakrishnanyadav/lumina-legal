@@ -316,7 +316,7 @@ const PremiumCrimeInput = ({
               >
                 <Loader2 className="w-6 h-6" />
               </motion.div>
-              <span>Analyzing Your Case...</span>
+              <span>Reviewing applicable statutes...</span>
             </>
           ) : (
             <>
@@ -326,7 +326,7 @@ const PremiumCrimeInput = ({
               >
                 <Search className="w-6 h-6" />
               </motion.div>
-              <span>Analyze Legal Situation</span>
+              <span>Analyze Situation</span>
             </>
           )}
         </span>
@@ -353,7 +353,7 @@ const PremiumCrimeInput = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        Describe the incident in detail for accurate legal section identification
+        Provide a detailed description for preliminary statutory analysis
       </motion.p>
     </div>
   );

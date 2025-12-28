@@ -6,7 +6,7 @@ const FloatingAIChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; content: string }[]>([
-    { role: 'ai', content: 'Hello! I\'m your AI legal assistant. How can I help you today?' },
+    { role: 'ai', content: "Welcome. I can provide general information about Indian criminal law. How may I assist you today?" },
   ]);
 
   const handleSend = () => {
@@ -21,7 +21,7 @@ const FloatingAIChat = () => {
         ...prev,
         {
           role: 'ai',
-          content: 'I understand you need legal assistance. Based on the Indian legal system, I can help you understand your rights and the applicable laws. Could you provide more details about your situation?',
+          content: "Based on the information provided, I can offer preliminary guidance on relevant statutory provisions. Please note this is for informational purposes only. Could you provide additional details about the circumstances?",
         },
       ]);
     }, 1500);
@@ -70,10 +70,10 @@ const FloatingAIChat = () => {
                     <Bot className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">AI Legal Assistant</h3>
+                    <h3 className="font-semibold">Legal Information Assistant</h3>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                      Online
+                      Available
                     </div>
                   </div>
                 </div>
@@ -123,7 +123,7 @@ const FloatingAIChat = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Type your question..."
+                    placeholder="Describe your situation..."
                     className="flex-1 rounded-xl px-4 py-3 text-sm outline-none transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     style={{
                       background: 'rgba(255, 255, 255, 0.05)',

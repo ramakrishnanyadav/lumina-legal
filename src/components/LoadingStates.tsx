@@ -109,7 +109,7 @@ export const FullPageLoader = ({
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            Loading...
+            Reviewing applicable statutes...
           </motion.p>
         </motion.div>
       )}
@@ -212,7 +212,7 @@ export const LoadingButton = ({
               animate={{ rotate: 360 }}
               transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
             />
-            <span>Processing...</span>
+            <span>Reviewing...</span>
           </motion.div>
         ) : isSuccess ? (
           <motion.div

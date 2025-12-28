@@ -23,7 +23,7 @@ const Footer = () => {
               </span>
             </motion.a>
             <p className="text-muted-foreground max-w-md mb-6">
-              Democratizing legal knowledge with AI. Understanding your rights shouldn't require a law degree.
+              AI-assisted legal information based on Indian criminal law. This platform provides general guidance, not legal advice.
             </p>
             <div className="flex gap-4">
               {[Twitter, Linkedin, Github, Mail].map((Icon, index) => (
@@ -42,9 +42,9 @@ const Footer = () => {
 
           {/* Links */}
           <div>
-            <h4 className="font-semibold mb-4">Product</h4>
+            <h4 className="font-semibold mb-4">Features</h4>
             <ul className="space-y-3 text-muted-foreground">
-              {['Crime Analyzer', 'Find Lawyers', 'Document Generator', 'Case Tracker'].map((item) => (
+              {['Situation Assessment', 'Connect with Advocates', 'Document Guidance', 'Procedural Steps'].map((item) => (
                 <li key={item}>
                   <motion.a
                     href="#"
@@ -61,7 +61,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-3 text-muted-foreground">
-              {['Legal Library', 'IPC Sections', 'Case Studies', 'Blog'].map((item) => (
+              {['Legal Reference', 'IPC Sections', 'Procedural Guides', 'Articles'].map((item) => (
                 <li key={item}>
                   <motion.a
                     href="#"

@@ -292,13 +292,13 @@ const ProceduralTimeline = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            Step-by-Step Guide
+            Procedural Overview
           </motion.span>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">Legal Process Timeline</span>
+            <span className="gradient-text">Procedural Steps</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Understanding the journey from complaint to judgment
+            Overview of the criminal justice process from filing to judgment
           </p>
         </motion.div>
 
@@ -346,7 +346,7 @@ const ProceduralTimeline = () => {
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', ...springConfig }}
           >
-            View Detailed Process Guide
+            View Complete Procedural Guide
             <motion.div
               animate={{ x: [0, 5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
