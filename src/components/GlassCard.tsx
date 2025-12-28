@@ -8,6 +8,7 @@ interface GlassCardProps {
   delay?: number;
   gradient?: boolean;
   index?: number;
+  variant?: 'default' | 'dark' | 'strong';
 }
 
 const springConfig = { damping: 20, stiffness: 300 };
@@ -19,9 +20,16 @@ const GlassCard = ({
   delay = 0,
   gradient = false,
   index = 0,
+  variant = 'default',
 }: GlassCardProps) => {
   // Calculate stagger delay based on index
   const staggerDelay = delay + index * 0.1;
+
+  const variantClasses = {
+    default: 'glass',
+    dark: 'glass-dark',
+    strong: 'glass-strong',
+  };
 
   return (
     <motion.div
@@ -50,10 +58,24 @@ const GlassCard = ({
         />
       )}
       
-      <div className={`relative glass rounded-2xl p-6 h-full ${gradient ? 'bg-card' : ''}`}>
+      <div className={`relative ${variantClasses[variant]} rounded-2xl p-6 h-full overflow-hidden`}>
+        {/* Inner glow effect on hover */}
         <motion.div
-          className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100"
-          transition={{ type: 'spring', ...springConfig }}
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          style={{
+            background: 'radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1) 0%, transparent 50%)',
+          }}
+        />
+        
+        {/* Subtle gradient overlay on hover */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, transparent 50%, rgba(123, 47, 247, 0.05) 100%)',
+          }}
         />
         
         <div className="relative z-10">{children}</div>
